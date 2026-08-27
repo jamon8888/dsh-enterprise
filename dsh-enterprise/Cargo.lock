@@ -15,43 +15,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
-name = "deep_causality_algebra"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfb031cc186c1d43ee454de56134505a95b7d4f768159d454672bed802174ef0"
-dependencies = [
- "deep_causality_num",
-]
-
-[[package]]
-name = "deep_causality_core"
-version = "0.11.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb3c5cffc38b4f3b121fe9d1393e48a79bdf13b3d8dc7ff04200ac99b6a2b5d6"
-dependencies = [
- "deep_causality_haft",
-]
-
-[[package]]
-name = "deep_causality_haft"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af8829c81fb60c4492230a5c000bdf9a861cedec2112f8e3ec01e7cbc8503800"
-dependencies = [
- "deep_causality_algebra",
-]
-
-[[package]]
-name = "deep_causality_num"
-version = "0.4.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80cdeeca5870c591bbc1da84542ec6c30ec153e9da855bb8e47addc838d4a1f2"
-
-[[package]]
 name = "dsh-enterprise-iit-core"
 version = "0.1.0"
 dependencies = [
- "deep_causality_core",
  "elara-active-inference",
  "getrandom",
  "ruvector-consciousness",
