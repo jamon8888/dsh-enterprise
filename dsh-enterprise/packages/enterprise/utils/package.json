@@ -1,0 +1,10 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-utils",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise shared utilities — canonicalJson, hashing helpers",
+  "license": "MIT OR Apache-2.0",
+  "exports": { ".": { "types": "./lib/canonical.d.ts", "default": "./lib/canonical.js" } },
+  "files": ["lib/"],
+  "devDependencies": { "vitest": "^3", "typescript": "^5.9.3" }
+}

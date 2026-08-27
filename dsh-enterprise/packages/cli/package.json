@@ -1,0 +1,27 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-cli",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise CLI — dsh-enterprise bin (port of facility/packages/cli)",
+  "license": "MIT OR Apache-2.0",
+  "bin": {
+    "dsh-enterprise": "dist/index.js"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis",
+    "@deepseek-ai/schemastery": "catalog:schemastery",
+    "yargs": "^17"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/yargs": "^17.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

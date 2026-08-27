@@ -1,0 +1,23 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-guards-iit",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "IIT/ICT guards for DSH Enterprise — Cordis plugin wrapping iit-core WASM + ICT sidecar",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis",
+    "@deepseek-ai/schemastery": "catalog:schemastery"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "//": "catalog note: facilityHarness via github:theam/facility#b150d96 is a peer of the repo (pnpm-workspace.yaml catalog), not this leaf"
+}

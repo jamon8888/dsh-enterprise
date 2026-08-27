@@ -1,0 +1,40 @@
+name: Bug report
+description: Something behaves differently from what the documentation or the interface promises.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The shortest path that shows the problem. A run id, issue number or request id is worth more than a description.
+    validations:
+      required: true
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: How are you running Facility?
+      options:
+        - Local development (pnpm dev)
+        - Self-hosted (containers or cloud)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Release, or the commit you are on.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Relevant logs or errors. Redact tokens and identity data before pasting.

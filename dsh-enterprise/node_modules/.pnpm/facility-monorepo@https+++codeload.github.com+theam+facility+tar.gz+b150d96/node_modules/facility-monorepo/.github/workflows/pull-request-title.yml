@@ -1,0 +1,57 @@
+# Keep version-input checks separate from ci.yml so title or base-branch edits
+# revalidate the lightweight policy without rerunning the full acceptance suite.
+name: conventional commit subjects
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  pull-request-title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: The title is a conventional commit
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: node scripts/conventional-commit-subjects.mjs title
+
+  # Merge commits are synthetic and do not release. A multi-commit squash takes
+  # its subject from the PR title (a lone commit keeps its own), while merge and
+  # rebase retain branch commits. Equal impact keeps all methods equivalent.
+  commit-subjects:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Validate version inputs and PR release impact
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TITLE: ${{ github.event.pull_request.title || '' }}
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            node scripts/conventional-commit-subjects.mjs pr
+          else
+            node scripts/conventional-commit-subjects.mjs range
+          fi

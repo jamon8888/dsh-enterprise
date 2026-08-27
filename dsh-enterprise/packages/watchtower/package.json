@@ -1,0 +1,22 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-watchtower",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise watchtower — hash-chained receipts + outcome joining (facility/services/api background job reimplementation)",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis",
+    "@deepseek-ai/schemastery": "catalog:schemastery"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "@deepseek-ai/dsh-auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "types": "./dist/types.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "cordis": "^0.2.0",
+    "schemastery": "^0.3.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/tsconfig": "workspace:*",
+    "cordis": "^0.2.0",
+    "schemastery": "^0.3.0",
+    "tsdown": "^0.3.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,32 @@
+name: Adoption feedback
+description: You are putting Facility on a real project and something helped, confused or blocked you.
+labels: ["adoption-feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Friction reports from real adoption are worth more to us than feature requests.
+        Rough notes are fine — we would rather read something unpolished than nothing.
+  - type: textarea
+    id: context
+    attributes:
+      label: What you were doing
+      description: Connecting a repository, running an agent, reviewing a plan, deploying…
+    validations:
+      required: true
+  - type: textarea
+    id: friction
+    attributes:
+      label: Where it went wrong, or slower than expected
+      description: Including things that worked but took longer than they should have.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+  - type: input
+    id: time
+    attributes:
+      label: Time from clone to first agent run
+      description: Rough is fine. If you never got there, say where you stopped.

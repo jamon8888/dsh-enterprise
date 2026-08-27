@@ -1,0 +1,360 @@
+diff --git a/dist/fromFile.cjs b/dist/fromFile.cjs
+index c226d3dac07f235db456c774b26cca88f655e1af..afbf7439df8741f865a2e7fa27791efe6dad4a5d 100644
+--- a/dist/fromFile.cjs
++++ b/dist/fromFile.cjs
+@@ -197,7 +197,11 @@ var HEIF = {
+         width = rawWidth - cropRight;
+       }
+       images.push({ height, width });
+-      currentOffset = ispeBox.offset + ispeBox.size;
++      const nextOffset = ispeBox.offset + ispeBox.size;
++      if (ispeBox.size === 0 || nextOffset <= currentOffset) {
++        throw new TypeError("Invalid HEIF, box does not advance");
++      }
++      currentOffset = nextOffset;
+     }
+     if (images.length === 0) {
+       throw new TypeError("Invalid HEIF, no sizes found");
+@@ -277,6 +281,9 @@ var ICNS = {
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] === 0) {
++        throw new TypeError("Invalid ICNS, entry does not advance");
++      }
+       const imageSize2 = getImageSize2(imageHeader[0]);
+       images.push(imageSize2);
+       imageOffset += imageHeader[1];
+@@ -511,10 +518,14 @@ function extractPartialStreams(input) {
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    const nextOffset = jxlpBox.offset + jxlpBox.size;
++    if (jxlpBox.size === 0 || nextOffset <= offset) {
++      throw new TypeError("Invalid JXL, box does not advance");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+-    offset = jxlpBox.offset + jxlpBox.size;
++    offset = nextOffset;
+   }
+   return partialStreams;
+ }
+diff --git a/dist/fromFile.mjs b/dist/fromFile.mjs
+index 4a3c44432982397204f7a9d04fc66ef65a8e7ba4..68f902f439c480ba3c32950002145764cd719e53 100644
+--- a/dist/fromFile.mjs
++++ b/dist/fromFile.mjs
+@@ -174,7 +174,11 @@ var HEIF = {
+         width = rawWidth - cropRight;
+       }
+       images.push({ height, width });
+-      currentOffset = ispeBox.offset + ispeBox.size;
++      const nextOffset = ispeBox.offset + ispeBox.size;
++      if (ispeBox.size === 0 || nextOffset <= currentOffset) {
++        throw new TypeError("Invalid HEIF, box does not advance");
++      }
++      currentOffset = nextOffset;
+     }
+     if (images.length === 0) {
+       throw new TypeError("Invalid HEIF, no sizes found");
+@@ -254,6 +258,9 @@ var ICNS = {
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] === 0) {
++        throw new TypeError("Invalid ICNS, entry does not advance");
++      }
+       const imageSize2 = getImageSize2(imageHeader[0]);
+       images.push(imageSize2);
+       imageOffset += imageHeader[1];
+@@ -488,10 +495,14 @@ function extractPartialStreams(input) {
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    const nextOffset = jxlpBox.offset + jxlpBox.size;
++    if (jxlpBox.size === 0 || nextOffset <= offset) {
++      throw new TypeError("Invalid JXL, box does not advance");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+-    offset = jxlpBox.offset + jxlpBox.size;
++    offset = nextOffset;
+   }
+   return partialStreams;
+ }
+diff --git a/dist/index.cjs b/dist/index.cjs
+index bde0210eb131db06ccca30a5c466c7252a03af50..4d9456216a0d4fb6f63f2b4751c7fed35f8d7955 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -173,7 +173,11 @@ var HEIF = {
+         width = rawWidth - cropRight;
+       }
+       images.push({ height, width });
+-      currentOffset = ispeBox.offset + ispeBox.size;
++      const nextOffset = ispeBox.offset + ispeBox.size;
++      if (ispeBox.size === 0 || nextOffset <= currentOffset) {
++        throw new TypeError("Invalid HEIF, box does not advance");
++      }
++      currentOffset = nextOffset;
+     }
+     if (images.length === 0) {
+       throw new TypeError("Invalid HEIF, no sizes found");
+@@ -253,6 +257,9 @@ var ICNS = {
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] === 0) {
++        throw new TypeError("Invalid ICNS, entry does not advance");
++      }
+       const imageSize2 = getImageSize2(imageHeader[0]);
+       images.push(imageSize2);
+       imageOffset += imageHeader[1];
+@@ -487,10 +494,14 @@ function extractPartialStreams(input) {
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    const nextOffset = jxlpBox.offset + jxlpBox.size;
++    if (jxlpBox.size === 0 || nextOffset <= offset) {
++      throw new TypeError("Invalid JXL, box does not advance");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+-    offset = jxlpBox.offset + jxlpBox.size;
++    offset = nextOffset;
+   }
+   return partialStreams;
+ }
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 22c17afad4e406eba013fff7858366cb5f8e3ba4..91327dfd340d51f9f289860692f3de93944cacfd 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -169,7 +169,11 @@ var HEIF = {
+         width = rawWidth - cropRight;
+       }
+       images.push({ height, width });
+-      currentOffset = ispeBox.offset + ispeBox.size;
++      const nextOffset = ispeBox.offset + ispeBox.size;
++      if (ispeBox.size === 0 || nextOffset <= currentOffset) {
++        throw new TypeError("Invalid HEIF, box does not advance");
++      }
++      currentOffset = nextOffset;
+     }
+     if (images.length === 0) {
+       throw new TypeError("Invalid HEIF, no sizes found");
+@@ -249,6 +253,9 @@ var ICNS = {
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] === 0) {
++        throw new TypeError("Invalid ICNS, entry does not advance");
++      }
+       const imageSize2 = getImageSize2(imageHeader[0]);
+       images.push(imageSize2);
+       imageOffset += imageHeader[1];
+@@ -483,10 +490,14 @@ function extractPartialStreams(input) {
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    const nextOffset = jxlpBox.offset + jxlpBox.size;
++    if (jxlpBox.size === 0 || nextOffset <= offset) {
++      throw new TypeError("Invalid JXL, box does not advance");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+-    offset = jxlpBox.offset + jxlpBox.size;
++    offset = nextOffset;
+   }
+   return partialStreams;
+ }
+diff --git a/dist/types/heif.cjs b/dist/types/heif.cjs
+index 1f490788ea654ea9896060a5c0253d81e348af92..91aed06d9f5e8ec7c08cc6a60e4bde6d8db08815 100644
+--- a/dist/types/heif.cjs
++++ b/dist/types/heif.cjs
+@@ -69,7 +69,11 @@ var HEIF = {
+         width = rawWidth - cropRight;
+       }
+       images.push({ height, width });
+-      currentOffset = ispeBox.offset + ispeBox.size;
++      const nextOffset = ispeBox.offset + ispeBox.size;
++      if (ispeBox.size === 0 || nextOffset <= currentOffset) {
++        throw new TypeError("Invalid HEIF, box does not advance");
++      }
++      currentOffset = nextOffset;
+     }
+     if (images.length === 0) {
+       throw new TypeError("Invalid HEIF, no sizes found");
+diff --git a/dist/types/heif.mjs b/dist/types/heif.mjs
+index 01330919e01b3c034a96a7b4b1dbf5a7f658bb2d..0392a8fd2c0b6c1b10ac28a2508613a58a61ab9c 100644
+--- a/dist/types/heif.mjs
++++ b/dist/types/heif.mjs
+@@ -67,7 +67,11 @@ var HEIF = {
+         width = rawWidth - cropRight;
+       }
+       images.push({ height, width });
+-      currentOffset = ispeBox.offset + ispeBox.size;
++      const nextOffset = ispeBox.offset + ispeBox.size;
++      if (ispeBox.size === 0 || nextOffset <= currentOffset) {
++        throw new TypeError("Invalid HEIF, box does not advance");
++      }
++      currentOffset = nextOffset;
+     }
+     if (images.length === 0) {
+       throw new TypeError("Invalid HEIF, no sizes found");
+diff --git a/dist/types/icns.cjs b/dist/types/icns.cjs
+index 32c8d370dcf80a10f14a6deebfdbe04d3c70585c..5de3e5a228b757e864b8b5a4a46fa5250e0f1cab 100644
+--- a/dist/types/icns.cjs
++++ b/dist/types/icns.cjs
+@@ -72,6 +72,9 @@ var ICNS = {
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] === 0) {
++        throw new TypeError("Invalid ICNS, entry does not advance");
++      }
+       const imageSize = getImageSize(imageHeader[0]);
+       images.push(imageSize);
+       imageOffset += imageHeader[1];
+diff --git a/dist/types/icns.mjs b/dist/types/icns.mjs
+index 8710027bc5890a79d05a7fdb87de3018e556729e..4ad5578ed16457ce6aa74f6dd07aef5c5c61a2c5 100644
+--- a/dist/types/icns.mjs
++++ b/dist/types/icns.mjs
+@@ -70,6 +70,9 @@ var ICNS = {
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] === 0) {
++        throw new TypeError("Invalid ICNS, entry does not advance");
++      }
+       const imageSize = getImageSize(imageHeader[0]);
+       images.push(imageSize);
+       imageOffset += imageHeader[1];
+diff --git a/dist/types/index.cjs b/dist/types/index.cjs
+index 6949cd134db7ab59dae7b804b36c7bacb4e387cf..50deeb5a646f92fc1be7ea89b62c68a6cbfb7384 100644
+--- a/dist/types/index.cjs
++++ b/dist/types/index.cjs
+@@ -171,7 +171,11 @@ var HEIF = {
+         width = rawWidth - cropRight;
+       }
+       images.push({ height, width });
+-      currentOffset = ispeBox.offset + ispeBox.size;
++      const nextOffset = ispeBox.offset + ispeBox.size;
++      if (ispeBox.size === 0 || nextOffset <= currentOffset) {
++        throw new TypeError("Invalid HEIF, box does not advance");
++      }
++      currentOffset = nextOffset;
+     }
+     if (images.length === 0) {
+       throw new TypeError("Invalid HEIF, no sizes found");
+@@ -251,6 +255,9 @@ var ICNS = {
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] === 0) {
++        throw new TypeError("Invalid ICNS, entry does not advance");
++      }
+       const imageSize = getImageSize2(imageHeader[0]);
+       images.push(imageSize);
+       imageOffset += imageHeader[1];
+@@ -485,10 +492,14 @@ function extractPartialStreams(input) {
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    const nextOffset = jxlpBox.offset + jxlpBox.size;
++    if (jxlpBox.size === 0 || nextOffset <= offset) {
++      throw new TypeError("Invalid JXL, box does not advance");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+-    offset = jxlpBox.offset + jxlpBox.size;
++    offset = nextOffset;
+   }
+   return partialStreams;
+ }
+diff --git a/dist/types/index.mjs b/dist/types/index.mjs
+index b026dda4aa16c6077a76e4b3cfe3f54fe1d6d1d0..d27379c3b2fcee9dcdb99bd33b252e0c0064f138 100644
+--- a/dist/types/index.mjs
++++ b/dist/types/index.mjs
+@@ -169,7 +169,11 @@ var HEIF = {
+         width = rawWidth - cropRight;
+       }
+       images.push({ height, width });
+-      currentOffset = ispeBox.offset + ispeBox.size;
++      const nextOffset = ispeBox.offset + ispeBox.size;
++      if (ispeBox.size === 0 || nextOffset <= currentOffset) {
++        throw new TypeError("Invalid HEIF, box does not advance");
++      }
++      currentOffset = nextOffset;
+     }
+     if (images.length === 0) {
+       throw new TypeError("Invalid HEIF, no sizes found");
+@@ -249,6 +253,9 @@ var ICNS = {
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] === 0) {
++        throw new TypeError("Invalid ICNS, entry does not advance");
++      }
+       const imageSize = getImageSize2(imageHeader[0]);
+       images.push(imageSize);
+       imageOffset += imageHeader[1];
+@@ -483,10 +490,14 @@ function extractPartialStreams(input) {
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    const nextOffset = jxlpBox.offset + jxlpBox.size;
++    if (jxlpBox.size === 0 || nextOffset <= offset) {
++      throw new TypeError("Invalid JXL, box does not advance");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+-    offset = jxlpBox.offset + jxlpBox.size;
++    offset = nextOffset;
+   }
+   return partialStreams;
+ }
+diff --git a/dist/types/jxl.cjs b/dist/types/jxl.cjs
+index a12095be85c7a8fd25763895a47c46b4292ebd9c..544f500aca321e8582df56fe9bccf4fbe8e29136 100644
+--- a/dist/types/jxl.cjs
++++ b/dist/types/jxl.cjs
+@@ -116,10 +116,14 @@ function extractPartialStreams(input) {
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    const nextOffset = jxlpBox.offset + jxlpBox.size;
++    if (jxlpBox.size === 0 || nextOffset <= offset) {
++      throw new TypeError("Invalid JXL, box does not advance");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+-    offset = jxlpBox.offset + jxlpBox.size;
++    offset = nextOffset;
+   }
+   return partialStreams;
+ }
+diff --git a/dist/types/jxl.mjs b/dist/types/jxl.mjs
+index 49b0c4cac6abb366378e5feed745f16981b441c0..d3ace4d007dba360521523c88e1b9f24a743a2ea 100644
+--- a/dist/types/jxl.mjs
++++ b/dist/types/jxl.mjs
+@@ -114,10 +114,14 @@ function extractPartialStreams(input) {
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    const nextOffset = jxlpBox.offset + jxlpBox.size;
++    if (jxlpBox.size === 0 || nextOffset <= offset) {
++      throw new TypeError("Invalid JXL, box does not advance");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+-    offset = jxlpBox.offset + jxlpBox.size;
++    offset = nextOffset;
+   }
+   return partialStreams;
+ }
