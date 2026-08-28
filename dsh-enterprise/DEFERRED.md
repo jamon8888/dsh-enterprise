@@ -23,6 +23,9 @@
 | `dsh-enterprise/packages/enterprise/dsh-library/src/plugin.ts:25` | `ponytail: in-memory .dsh/library stub, fs.read when .dsh/library lands` | `.dsh/library` populated + `fs.read` via `dsh-library` provider |
 | `dsh-enterprise/packages/enterprise/dsh-mneme/src/plugin.ts:19` | `ponytail: in-memory Map primary, better-sqlite3 when native addon lands` | `watchtower` PG lands or `better-sqlite3` native build stable |
 | `dsh-enterprise/packages/enterprise/dsh-mneme/src/plugin.ts:46` | `ponytail: substring query over Map, sqlite LIKE when better-sqlite3 lands` | Same as above — `recall` switches to `SELECT ... LIKE` |
+| `dsh-enterprise/packages/enterprise/dsh-local-llm/src/plugin.ts:9` | `ponytail: in-memory Ollama stub, Ollama 7B/70B when air-gapped K8s lands` | Ollama 7B/70B in air-gapped K8s (`EU-airgapped` Helm) |
+| `dsh-enterprise/packages/enterprise/dsh-model-router/src/plugin.ts:9` | `ponytail: in-memory router stub, cost/latency/quality when gateway PG lands` | `gateway` PG + real `cost/latency/quality` router |
+| `dsh-enterprise/packages/enterprise/model-registry/src/plugin.ts:6` | `ponytail: in-memory Map, PG when gateway pg lands` — `model_deployments` Map stub | `gateway` PG `model_deployments` table lands (migration 002) |
 
 ---
 
@@ -43,8 +46,8 @@
 | 11 | `dsh-git-worktree` | ⏳ not scaffolded | `cli --with worktree` `../worktrees/` |
 | 12 | `dsh-pr-agent` | ⏳ not scaffolded | Auto-review `security/style/test` on PR open |
 | 13 | `dsh-release` | ⏳ not scaffolded | `version bump → SBOM → Cosign → Helm` |
-| 14 | `dsh-local-llm` | ⏳ not scaffolded | Ollama 7B/70B in air-gapped K8s |
-| 15 | `dsh-model-router` | ⏳ not scaffolded | `cost/latency/quality` router for `gateway` |
+| 14 | `dsh-local-llm` | ✅ scaffolded `packages/enterprise/dsh-local-llm` (3 tests) — `ctx.effect('local-llm')` + `ctx.on('gateway/request')` EU-airgapped | Ollama 7B/70B in air-gapped K8s |
+| 15 | `dsh-model-router` | ✅ scaffolded `packages/enterprise/dsh-model-router` (2 tests) — `ctx.effect('model-router')` + `ctx.on('gateway/request')` → `local-llm`/`gateway` | `cost/latency/quality` router for `gateway` |
 
 ---
 
