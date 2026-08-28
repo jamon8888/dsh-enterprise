@@ -5,6 +5,7 @@
  */
 
 import { canonicalJson, sha256Hex } from '@deepseek-ai/dsh-enterprise-utils'
+export { canonicalJson, sha256Hex } from '@deepseek-ai/dsh-enterprise-utils'
 import type { Receipt, Run } from './types.js'
 
 /** Hash of a receipt without its own `hash` field (the content hash). */

@@ -1,0 +1,70 @@
+{
+  "title": "DSH Enterprise",
+  "uid": "dsh-enterprise",
+  "schemaVersion": 30,
+  "version": 1,
+  "datasource": "Postgres",
+  "tags": ["dsh-enterprise"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Phi trajectory (per-run phiSnapshot.phi)",
+      "type": "timeseries",
+      "datasource": { "type": "postgres", "uid": "Postgres" },
+      "targets": [
+        {
+          "rawSql": "SELECT created_at AS time, (phi_snapshot->>'phi')::float AS phi FROM run_events ORDER BY created_at",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short", "min": 0 },
+        "overrides": []
+      },
+      "description": "Per-run phiSnapshot.phi from BenchmarkEnvelope dual-written to run_events"
+    },
+    {
+      "id": 2,
+      "title": "Cost per orgId / projectId (envelope.cost.usd)",
+      "type": "timeseries",
+      "datasource": { "type": "postgres", "uid": "Postgres" },
+      "targets": [
+        {
+          "rawSql": "SELECT created_at AS time, org_id, project_id, (cost->>'usd')::float AS usd FROM run_events ORDER BY created_at",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "currencyUSD" },
+        "overrides": []
+      },
+      "transformations": [
+        { "id": "groupBy", "options": { "fields": { "org_id": { "aggregations": [] }, "project_id": { "aggregations": [] }, "usd": { "aggregations": ["sum"] } } } }
+      ],
+      "description": "Cost per orgId/projectId from envelope.cost.usd (run_events)"
+    },
+    {
+      "id": 3,
+      "title": "EWS variance / ac1 (iit/ews)",
+      "type": "timeseries",
+      "datasource": { "type": "postgres", "uid": "Postgres" },
+      "targets": [
+        {
+          "rawSql": "SELECT created_at AS time, (ews->>'variance')::float AS variance, (ews->>'ac1')::float AS ac1 FROM run_events WHERE ews IS NOT NULL ORDER BY created_at",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short" },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "variance" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }] },
+          { "matcher": { "id": "byName", "options": "ac1" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] }
+        ]
+      },
+      "description": "Early-warning signals variance/ac1 from iit/ews (attractor EWS, written via BenchmarkEnvelope.ews)"
+    }
+  ],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" }
+}

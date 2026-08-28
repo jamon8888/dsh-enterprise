@@ -45,18 +45,44 @@ export function apply(ctx: Context, cfg: Config): void {
   const orig = typeof tools.guard === 'function' ? (tools.guard as (ev: unknown, next: (ev: unknown) => Promise<unknown>) => Promise<unknown>).bind(tools) : undefined
 
   const runGuards = async (ev: unknown): Promise<void> => {
-    const e = ev as { tpm?: unknown; state?: number }
-    if (e?.tpm === undefined || e?.state === undefined) return
+    const e = ev as { tpm?: unknown; state?: number; phi?: number; minPhi?: number }
+    // emit policy/evaluate before phi check so triad can intercept
+    const phiEv: any = {
+      phi: (e as any).phi,
+      minPhi: cfg.minPhi,
+      tpm: (e as any).tpm,
+      state: (e as any).state,
+      region: (e as any).region,
+    };
+    if (typeof (ctx as any).waterfall === 'function') {
+      await (ctx as any).waterfall('policy/evaluate', phiEv, async (x: unknown) => x);
+    }
+    // also register ctx.on hook path for audit mirror
+    // phi threshold check via policy/evaluate already done above; still run guard for completeness
+    if (e?.tpm === undefined || e?.state === undefined) {
+      // if no tpm but phi already evaluated via policy/evaluate, still check phi < minPhi
+      if (typeof phiEv.phi === 'number' && phiEv.phi < cfg.minPhi) {
+        throw new GuardError(`phi ${phiEv.phi} < minPhi ${cfg.minPhi}`);
+      }
+      return;
+    }
     for (const guard of GUARDS) {
       const config = guard.Config.shape ? guard.Config.parse({}) : {}
-      // Merge with enterprise config
       const mergedConfig = { ...config, minPhi: cfg.minPhi }
-      const result = await guard.run(ctx, mergedConfig, e)
+      const result = (await guard.run(ctx, mergedConfig, e as any)) as import('./types.js').GuardResult
       if (result.disposition === 'block') {
-        throw new GuardError(result.reason ?? `Guard ${guard.id} blocked`)
+        throw new GuardError((result as import('./types.js').GuardResult).reason ?? `Guard ${guard.id} blocked`)
       }
     }
   }
+
+  // ctx.on hook to emit policy/evaluate before phi check (for direct callers)
+  ctx.on('policy/evaluate', async (ev: any, next: any) => {
+    if (typeof ev.phi === 'number' && typeof ev.minPhi === 'number' && ev.phi < ev.minPhi) {
+      throw new GuardError(`phi ${ev.phi} < minPhi ${ev.minPhi}`);
+    }
+    return next(ev);
+  });
 
   if (orig) {
     tools.guard = async (ev: unknown, next: (ev: unknown) => Promise<unknown>) => {

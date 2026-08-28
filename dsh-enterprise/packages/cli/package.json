@@ -13,7 +13,8 @@
   "dependencies": {
     "@deepseek-ai/cordis": "catalog:cordis",
     "@deepseek-ai/schemastery": "catalog:schemastery",
-    "yargs": "^17"
+    "yargs": "^17",
+    "@deepseek-ai/dsh-enterprise-utils": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "*"

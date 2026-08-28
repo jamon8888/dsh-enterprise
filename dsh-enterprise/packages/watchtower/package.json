@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@deepseek-ai/cordis": "catalog:cordis",
-    "@deepseek-ai/schemastery": "catalog:schemastery"
+    "@deepseek-ai/schemastery": "catalog:schemastery",
+    "@deepseek-ai/dsh-enterprise-utils": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "*"

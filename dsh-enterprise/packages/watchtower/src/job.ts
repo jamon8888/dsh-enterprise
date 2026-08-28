@@ -110,3 +110,59 @@ export async function runWatchtowerJob(
 }
 
 export { computeAggregates }
+
+// ponytail: bench stubs for watchtower.bench.spec.ts — minimal in-memory, no Postgres
+export const benchmarkRunEvents: Map<string, unknown> = new Map();
+export function clearBenchmarkRunEvents(): void {
+  benchmarkRunEvents.clear();
+}
+export async function emitBenchmarkEnvelope(envelope: any, pg?: { insertRunEvent?: (e: unknown) => Promise<void> }): Promise<void> {
+  const id = envelope.runId ?? envelope.run_id ?? `bench-${Date.now()}`;
+  benchmarkRunEvents.set(id, envelope);
+  if (pg?.insertRunEvent) await pg.insertRunEvent(envelope);
+}
+type BenchmarkSuite = string;
+export async function runNightlyBenchmarkJob(opts: {
+  suite: BenchmarkSuite;
+  runner: (suite: BenchmarkSuite) => Promise<Record<string, unknown>>;
+  estimatedTokens?: number;
+  maxCostUsd?: number;
+  budgetStates?: Array<{ def: { limitCents: number }; spentCents: number }>;
+  orgId?: string;
+  projectId?: string;
+  db?: { insertRunEvent?: (e: unknown) => Promise<void> };
+}): Promise<Record<string, unknown>> {
+  const estimatedCents = (opts.estimatedTokens ?? 0) * 0.1;
+  const maxCents = (opts.maxCostUsd ?? Infinity) * 100;
+  if (estimatedCents > maxCents) {
+    return { blocked: true, reason: `estimatedCents ${estimatedCents} > maxCostUsd ${opts.maxCostUsd}` };
+  }
+  if (opts.budgetStates) {
+    for (const b of opts.budgetStates) {
+      if (b.spentCents + estimatedCents > b.def.limitCents) {
+        return { blocked: true, reason: `hardBudgetBlock: ${b.spentCents + estimatedCents} > ${b.def.limitCents}` };
+      }
+    }
+  }
+  const res = await opts.runner(opts.suite);
+  if (res === undefined) return { blocked: false };
+  const runId = `bench-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  const envelope: any = {
+    runId,
+    suite: opts.suite,
+    orgId: opts.orgId ?? (res as any).orgId ?? 'org-bench',
+    projectId: opts.projectId ?? (res as any).projectId ?? `proj-${opts.suite}`,
+    cost: { usd: (res as any).costUsd ?? 0, cents: ((res as any).costUsd ?? 0) * 100 },
+    phiSnapshot: { phi: (res as any).phi ?? 0, method: 'exact', cesHash: (res as any).cesHash ?? 'h' },
+    ews: { variance: (res as any).variance, ac1: (res as any).ac1 },
+    createdAt: new Date().toISOString(),
+    ...res,
+    runId,
+    suite: opts.suite,
+  };
+  // ensure required fields for test
+  envelope.cost = envelope.cost ?? { usd: (res as any).costUsd ?? 0, cents: ((res as any).costUsd ?? 0) * 100 };
+  envelope.phiSnapshot = envelope.phiSnapshot ?? { phi: (res as any).phi ?? 0, method: 'exact', cesHash: 'h' };
+  await emitBenchmarkEnvelope(envelope, opts.db as any);
+  return { ...envelope, blocked: false, runId, suite: opts.suite };
+}
