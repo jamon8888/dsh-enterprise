@@ -57,7 +57,7 @@ describe('guard-runner', () => {
 
   it('error short-circuits — phi < minPhi throws GuardError and does not call next()', async () => {
     const { ctx, handlers } = mockCtx({
-      services: { iitGuards: { calculatePhi: async () => ({ phi: 0.01 }) } },
+      services: { iitGuards: { calculatePhi: async () => ({ phi: 0.01, cesHash: 'abc' }) } },
     })
     apply(ctx as never, { minPhi: 0.1, max_exact_size: 15, tpmVars: [] } as never)
     const onHandler = handlers['tools/guard'] as ((ev: unknown, next: (ev: unknown) => Promise<unknown>) => Promise<unknown>) | undefined

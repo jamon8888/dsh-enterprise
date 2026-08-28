@@ -30,7 +30,7 @@ export const cesFingerprintGuard = {
       // fall through to callCesHash
     }
     if (!cesHash) cesHash = await callCesHash(event)
-    if (cesHash !== cfg.expectedHash) throw new GuardError(`ces mismatch: ${cesHash} !== ${cfg.expectedHash}`)
+    if (cfg.expectedHash && cesHash !== cfg.expectedHash) throw new GuardError(`ces mismatch: ${cesHash} !== ${cfg.expectedHash}`)
     return { disposition: 'pass', cesHash }
   },
 }
