@@ -11,6 +11,7 @@ import { boundaryFrontierGuard } from './guards/boundary-frontier.js'
 import { attractorEwsGuard } from './guards/attractor-ews.js'
 import { catastropheCuspGuard } from './guards/catastrophe-cusp.js'
 import { phiThresholdGuard } from './guards/phi-threshold.js'
+import { recordPhi, recordEws, recordLatency } from './telemetry.js'
 
 export const GUARDS = [phiThresholdGuard, cesFingerprintGuard, boundaryFrontierGuard, attractorEwsGuard, catastropheCuspGuard] as const
 
@@ -32,10 +33,17 @@ export function apply(ctx: Context, cfg: Config): void {
   // iitGuards service — pure decoration, disposer is no-op (WASM module is stateless per call)
   ctx.effect('iitGuards', () => ({
     calculatePhi: async (tpm: unknown, state: number) => {
+      const t0 = performance.now()
       const mod = await import('@deepseek-ai/dsh-enterprise-iit-core/pkg') as {
         calculate_phi_js: (tpmJson: string, state: number, budget: string) => unknown
       }
-      return mod.calculate_phi_js(JSON.stringify(tpm), state, 'exact') as { phi: number; cesHash?: string }
+      const result = mod.calculate_phi_js(JSON.stringify(tpm), state, 'exact') as { phi: number; cesHash?: string }
+      const ms = performance.now() - t0
+      if (typeof result.phi === 'number') {
+        recordPhi(result.phi)
+        recordLatency(ms, 'calculatePhi')
+      }
+      return result
     },
     runCusp: async (traj: unknown) => callIctBridge('/catastrophe/fit', { traj }),
   }))
@@ -69,7 +77,16 @@ export function apply(ctx: Context, cfg: Config): void {
     for (const guard of GUARDS) {
       const config = guard.Config.shape ? guard.Config.parse({}) : {}
       const mergedConfig = { ...config, minPhi: cfg.minPhi }
+      const t0 = performance.now()
       const result = (await guard.run(ctx, mergedConfig, e as any)) as import('./types.js').GuardResult
+      const ms = performance.now() - t0
+      recordLatency(ms, guard.id)
+      if (guard.id === 'attractor-ews') {
+        const r = result as { variance?: number; ac1?: number }
+        if (typeof r.variance === 'number' && typeof r.ac1 === 'number') {
+          recordEws(r.variance, r.ac1)
+        }
+      }
       if (result.disposition === 'block') {
         throw new GuardError((result as import('./types.js').GuardResult).reason ?? `Guard ${guard.id} blocked`)
       }
