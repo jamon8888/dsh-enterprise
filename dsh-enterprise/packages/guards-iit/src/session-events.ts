@@ -17,6 +17,21 @@ declare module '@deepseek-ai/dsh-session' {
       timestamp: number
       ignorable?: true
     }
+    'policy/evaluate': {
+      turn: number
+      step: number
+      callId: string
+      guards: readonly {
+        guardId: string
+        disposition: 'pass' | 'block' | 'warn'
+        phi?: number
+        reason?: string
+      }[]
+      finalDisposition: 'pass' | 'block'
+      blockedBy?: string
+      timestamp: number
+      ignorable?: true
+    }
   }
 }
 

@@ -59,16 +59,40 @@ export function apply(ctx: Context, cfg: Config): void {
     calculatePhi: async (tpm: unknown, state: number) => {
       const cached = cesCache.get(tpm, state)
       if (cached) return { phi: cached.phi ?? 0, cesHash: cached.cesHash }
-      const t0 = Date.now()
+      const t0 = performance.now()
       const mod = await import('@deepseek-ai/dsh-enterprise-iit-core/pkg') as {
         calculate_phi_js: (tpmJson: string, state: number, budget: string) => unknown
       }
       const result = mod.calculate_phi_js(JSON.stringify(tpm), state, 'exact') as { phi: number; cesHash?: string }
-      const ms = Date.now() - t0
+      const ms = performance.now() - t0
       recordPhi(result.phi)
       recordLatency(ms, 'calculatePhi')
       cesCache.set(tpm, state, { disposition: 'pass', phi: result.phi, cesHash: result.cesHash })
       return result
+    },
+    phi_trajectory_wasm: async (phiHistoryJson: string, configJson: string) => {
+      const mod = await import('@deepseek-ai/dsh-enterprise-iit-core/pkg') as unknown as {
+        phi_trajectory_wasm: (phiHistoryJson: string, configJson: string) => unknown
+      }
+      return mod.phi_trajectory_wasm(phiHistoryJson, configJson)
+    },
+    ignition_score_wasm: async (broadcastJson: string, fanOut: number, threshold: number) => {
+      const mod = await import('@deepseek-ai/dsh-enterprise-iit-core/pkg') as unknown as {
+        ignition_score_wasm: (broadcastJson: string, fanOut: number, threshold: number) => unknown
+      }
+      return mod.ignition_score_wasm(broadcastJson, fanOut, threshold)
+    },
+    teloids_compile_wasm: async (yaml: string) => {
+      const mod = await import('@deepseek-ai/dsh-enterprise-iit-core/pkg') as unknown as {
+        teloids_compile_wasm: (yaml: string) => unknown
+      }
+      return mod.teloids_compile_wasm(yaml)
+    },
+    teloids_evaluate_wasm: async (compiledJson: string, actionJson: string) => {
+      const mod = await import('@deepseek-ai/dsh-enterprise-iit-core/pkg') as unknown as {
+        teloids_evaluate_wasm: (compiledJson: string, actionJson: string) => unknown
+      }
+      return mod.teloids_evaluate_wasm(compiledJson, actionJson)
     },
     runCusp: async (traj: unknown) => callIctBridge('/catastrophe/fit', { traj }),
   }))
@@ -100,24 +124,49 @@ export function apply(ctx: Context, cfg: Config): void {
       throw new GuardError(`phi ${phiEv.phi} < minPhi ${cfg.minPhi}`)
     }
     const hasTpm = e?.tpm !== undefined && e?.state !== undefined
+    const guardDecisions: { guardId: string; disposition: string; phi?: number; reason?: string }[] = []
     for (const guard of GUARDS) {
       if (!hasTpm && TPM_DEPENDENT.has(guard.id)) continue
-      const t0 = Date.now()
+      const t0 = performance.now()
       const result = (await guard.run(ctx, cfg as any, e as any)) as import('./types.js').GuardResult
-      const ms = Date.now() - t0
+      const ms = performance.now() - t0
       recordLatency(ms, guard.id)
+      guardDecisions.push({ guardId: guard.id, disposition: result.disposition, phi: result.phi, reason: result.reason })
       if (result.disposition === 'block') {
         emitGuardDecision(ctx, guard.id, result)
-        throw new GuardError((result as import('./types.js').GuardResult).reason ?? `Guard ${guard.id} blocked`)
+        try {
+          ;(ctx.emit as (event: string, payload: unknown) => void)('policy/evaluate', {
+            turn: (ev as { turn?: number }).turn ?? 0,
+            step: (ev as { step?: number }).step ?? 0,
+            callId: (ev as { callId?: string }).callId ?? '',
+            guards: guardDecisions,
+            finalDisposition: 'block',
+            blockedBy: guard.id,
+            timestamp: Date.now(),
+            ignorable: true,
+          })
+        } catch {}
+        throw new GuardError(result.reason ?? `Guard ${guard.id} blocked`)
       }
       emitGuardDecision(ctx, guard.id, result)
       if (guard.id === 'attractor-ews') {
-        const ewsResult = result as { variance: number; ac1: number }
-        if (ewsResult.variance !== undefined) {
+        const ewsResult = result as unknown as { variance?: number; ac1?: number }
+        if (ewsResult.variance !== undefined && ewsResult.ac1 !== undefined) {
           recordEws(ewsResult.variance, ewsResult.ac1)
         }
       }
     }
+    try {
+      ;(ctx.emit as (event: string, payload: unknown) => void)('policy/evaluate', {
+        turn: (ev as { turn?: number }).turn ?? 0,
+        step: (ev as { step?: number }).step ?? 0,
+        callId: (ev as { callId?: string }).callId ?? '',
+        guards: guardDecisions,
+        finalDisposition: 'pass',
+        timestamp: Date.now(),
+        ignorable: true,
+      })
+    } catch {}
   }
 
   // ctx.on hook to emit policy/evaluate before phi check (for direct callers)

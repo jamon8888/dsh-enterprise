@@ -138,6 +138,79 @@ describe('iit-guard.decision session events', () => {
     expect('ignorable' in warn).toBe(false)
   })
 
+  it('emits policy/evaluate with full guard list after all guards pass', async () => {
+    const { ctx, handlers, emitCalls } = mockCtx({
+      services: {
+        iitGuards: {
+          calculatePhi: async () => ({ phi: 0.5, cesHash: 'abc' }),
+          runCusp: async () => ({ ok: true }),
+        },
+      },
+    })
+    apply(ctx as never, { minPhi: 0.1, max_exact_size: 15, tpmVars: ['tool_success'] } as never)
+    const onHandler = handlers['tools/guard'] as
+      | ((ev: unknown, next: (ev: unknown) => Promise<unknown>) => Promise<unknown>)
+      | undefined
+    expect(onHandler).toBeDefined()
+    const next = vi.fn(async (ev) => ({ disposition: 'pass' }))
+    await onHandler!({ tpm: { n: 2, data: [[1, 0], [0, 1]] }, state: 0 }, next as never)
+    const policyEvents = emitCalls.filter((c) => c.event === 'policy/evaluate')
+    expect(policyEvents.length).toBeGreaterThan(0)
+    const passEvent = policyEvents.find(
+      (c) => (c.payload as { finalDisposition: string }).finalDisposition === 'pass',
+    )
+    expect(passEvent).toBeDefined()
+    const p = passEvent!.payload as {
+      turn: number
+      step: number
+      callId: string
+      guards: readonly { guardId: string; disposition: string }[]
+      finalDisposition: string
+      timestamp: number
+      ignorable?: true
+    }
+    expect(Array.isArray(p.guards)).toBe(true)
+    expect(p.guards.length).toBeGreaterThan(0)
+    expect(p.finalDisposition).toBe('pass')
+    expect(typeof p.timestamp).toBe('number')
+    expect(p.ignorable).toBe(true)
+  })
+
+  it('emits policy/evaluate with block disposition before throwing GuardError', async () => {
+    const { ctx, handlers, emitCalls } = mockCtx({
+      services: {
+        iitGuards: {
+          calculatePhi: async () => ({ phi: 0.01, cesHash: 'abc' }),
+          runCusp: async () => ({ ok: true }),
+        },
+      },
+    })
+    apply(ctx as never, { minPhi: 0.1, max_exact_size: 15, tpmVars: [] } as never)
+    const onHandler = handlers['tools/guard'] as
+      | ((ev: unknown, next: (ev: unknown) => Promise<unknown>) => Promise<unknown>)
+      | undefined
+    expect(onHandler).toBeDefined()
+    const next = vi.fn(async (ev) => ({ disposition: 'pass' }))
+    await expect(onHandler!({ tpm: {}, state: 0 }, next as never)).rejects.toThrow(GuardError)
+    const policyEvents = emitCalls.filter((c) => c.event === 'policy/evaluate')
+    const blockEvent = policyEvents.find(
+      (c) => (c.payload as { finalDisposition: string }).finalDisposition === 'block',
+    )
+    expect(blockEvent).toBeDefined()
+    const p = blockEvent!.payload as {
+      guards: readonly { guardId: string; disposition: string }[]
+      finalDisposition: string
+      blockedBy: string
+      timestamp: number
+      ignorable?: true
+    }
+    expect(p.finalDisposition).toBe('block')
+    expect(p.blockedBy).toBe('phi-threshold')
+    expect(Array.isArray(p.guards)).toBe(true)
+    expect(p.ignorable).toBe(true)
+    expect(typeof p.timestamp).toBe('number')
+  })
+
   it('is fail-open when ctx.emit throws', async () => {
     const { emitGuardDecision } = await import('../src/session-events.js')
     const throwingCtx = { emit: () => { throw new Error('emit failed') } } as any
