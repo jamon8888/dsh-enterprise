@@ -1,6 +1,6 @@
 // mock for @deepseek-ai/dsh-enterprise-iit-core/pkg — real WASM not built in CI
 export function calculate_phi_js(tpmJson: string, state: number, _budget: string): unknown {
-  return { phi: 0.5, cesHash: String(state), mip: { tpm: JSON.parse(tpmJson), state } }
+  return { phi: 0.5, cesHash: String(state), mip: 0.5 }
 }
 
 export function phi_trajectory_wasm(_phiHistoryJson: string, _configJson: string): unknown {
