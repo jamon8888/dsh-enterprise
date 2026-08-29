@@ -7,6 +7,10 @@ import type { Context } from '@deepseek-ai/cordis'
 import type { Config } from './config.js'
 import { callIctBridge } from './bridge.js'
 import { emitGuardDecision } from './session-events.js'
+import { CesCache } from './cache.js'
+import { recordPhi, recordLatency, recordEws } from './telemetry.js'
+
+const cesCache = new CesCache()
 import { cesFingerprintGuard } from './guards/ces-fingerprint.js'
 import { boundaryFrontierGuard } from './guards/boundary-frontier.js'
 import { attractorEwsGuard } from './guards/attractor-ews.js'
@@ -53,10 +57,18 @@ export class GuardError extends Error {
 export function apply(ctx: Context, cfg: Config): void {
   ctx.effect('iitGuards', () => ({
     calculatePhi: async (tpm: unknown, state: number) => {
+      const cached = cesCache.get(tpm, state)
+      if (cached) return { phi: cached.phi ?? 0, cesHash: cached.cesHash }
+      const t0 = Date.now()
       const mod = await import('@deepseek-ai/dsh-enterprise-iit-core/pkg') as {
         calculate_phi_js: (tpmJson: string, state: number, budget: string) => unknown
       }
-      return mod.calculate_phi_js(JSON.stringify(tpm), state, 'exact') as { phi: number; cesHash?: string }
+      const result = mod.calculate_phi_js(JSON.stringify(tpm), state, 'exact') as { phi: number; cesHash?: string }
+      const ms = Date.now() - t0
+      recordPhi(result.phi)
+      recordLatency(ms, 'calculatePhi')
+      cesCache.set(tpm, state, { disposition: 'pass', phi: result.phi, cesHash: result.cesHash })
+      return result
     },
     runCusp: async (traj: unknown) => callIctBridge('/catastrophe/fit', { traj }),
   }))
@@ -90,12 +102,21 @@ export function apply(ctx: Context, cfg: Config): void {
     const hasTpm = e?.tpm !== undefined && e?.state !== undefined
     for (const guard of GUARDS) {
       if (!hasTpm && TPM_DEPENDENT.has(guard.id)) continue
+      const t0 = Date.now()
       const result = (await guard.run(ctx, cfg as any, e as any)) as import('./types.js').GuardResult
+      const ms = Date.now() - t0
+      recordLatency(ms, guard.id)
       if (result.disposition === 'block') {
         emitGuardDecision(ctx, guard.id, result)
         throw new GuardError((result as import('./types.js').GuardResult).reason ?? `Guard ${guard.id} blocked`)
       }
       emitGuardDecision(ctx, guard.id, result)
+      if (guard.id === 'attractor-ews') {
+        const ewsResult = result as { variance: number; ac1: number }
+        if (ewsResult.variance !== undefined) {
+          recordEws(ewsResult.variance, ewsResult.ac1)
+        }
+      }
     }
   }
 

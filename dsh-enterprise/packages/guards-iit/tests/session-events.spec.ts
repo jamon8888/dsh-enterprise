@@ -138,6 +138,22 @@ describe('iit-guard.decision session events', () => {
     expect('ignorable' in warn).toBe(false)
   })
 
+  it('is fail-open when ctx.emit throws', async () => {
+    const { emitGuardDecision } = await import('../src/session-events.js')
+    const throwingCtx = { emit: () => { throw new Error('emit failed') } } as any
+    expect(() => emitGuardDecision(throwingCtx, 'phi-threshold', { disposition: 'pass', phi: 0.5 })).not.toThrow()
+  })
+
+  it('includes violated field in payload when result has violated', async () => {
+    const { emitGuardDecision } = await import('../src/session-events.js')
+    const calls: { event: string; payload: unknown }[] = []
+    const ctx = { emit: (e: string, p: unknown) => { calls.push({ event: e, payload: p }) } } as any
+    emitGuardDecision(ctx, 'effect-ethos', { disposition: 'warn', reason: 'norm broken', violated: ['no-homicide'] })
+    expect(calls.length).toBe(1)
+    const p = calls[0].payload as { guardId: string; violated?: string[] }
+    expect(p.violated).toEqual(['no-homicide'])
+  })
+
   it('emits pass events with ignorable:true for pass dispositions', async () => {
     const { ctx, handlers, emitCalls } = mockCtx({
       services: {
