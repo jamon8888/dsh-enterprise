@@ -1,5 +1,8 @@
 /**
  * causal-emergence guard tests.
+ *
+ * MIT OR Apache-2.0
+ *
  * @module @deepseek-ai/dsh-enterprise-guards-iit/guards/causal-emergence
  */
 
