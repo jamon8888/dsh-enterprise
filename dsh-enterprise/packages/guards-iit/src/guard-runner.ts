@@ -19,6 +19,9 @@ import { phiThresholdGuard } from './guards/phi-threshold.js'
 import { workspaceIgnitionGuard } from './guards/workspace-ignition.js'
 import { phiTrajectoryGuard } from './guards/phi-trajectory.js'
 import { effectEthosGuard } from './guards/effect-ethos.js'
+import { freeEnergyGuard } from './guards/free-energy.js'
+import { causalEmergenceGuard } from './guards/causal-emergence.js'
+import { mipShiftGuard } from './guards/mip-shift.js'
 
 export const GUARDS = [
   phiThresholdGuard,
@@ -29,6 +32,9 @@ export const GUARDS = [
   attractorEwsGuard,
   catastropheCuspGuard,
   effectEthosGuard,
+  freeEnergyGuard,
+  causalEmergenceGuard,
+  mipShiftGuard,
 ] as const
 
 /** Guards that require a TPM + state to evaluate; skipped for action-only events. */
@@ -39,6 +45,9 @@ const TPM_DEPENDENT = new Set([
   'boundary-frontier',
   'attractor-ews',
   'catastrophe-cusp',
+  'mip-shift',
+  'free-energy',
+  'causal-emergence',
 ])
 
 export const name = 'dsh-enterprise:guards-iit'
