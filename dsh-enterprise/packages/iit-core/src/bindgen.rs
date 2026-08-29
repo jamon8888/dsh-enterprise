@@ -3,6 +3,7 @@
 use crate::teloids::{ActionContext, Severity, Teloid, TeloidsConfig, evaluate_teloids};
 use crate::trajectory::{TrajectoryConfig, phi_trajectory};
 use crate::workspace::{ignition_score, is_ignited};
+use ruvector_consciousness::ces::compute_ces;
 use ruvector_consciousness::types::{ComputeBudget, TransitionMatrix};
 use wasm_bindgen::prelude::*;
 
@@ -118,4 +119,39 @@ pub fn teloids_evaluate_wasm(compiled_json: &str, action_json: &str) -> Result<J
     let result =
         evaluate_teloids(&serde_json::to_string(&config.teloids).unwrap(), &action, &config);
     serde_wasm_bindgen::to_value(&result).map_err(|e| JsValue::from_str(&format!("{e:?}")))
+}
+
+/// Compute CES (Causal Emergence Strength) hash from TPM.
+///
+/// * `tpm_json` — canonical JSON of `TransitionMatrix { n, data }` (row-major).
+/// * `state` — current system state index.
+///
+/// Returns `JsValue` of `{ cesHash: String }` where `cesHash` is `big_phi` as hex.
+#[wasm_bindgen]
+pub fn calculate_ces_js(tpm_json: &str, state: usize) -> Result<JsValue, JsValue> {
+    let tpm: TransitionMatrix =
+        serde_json::from_str(tpm_json).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let ces = compute_ces(&tpm, state, 0.0, &ComputeBudget::default())
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let ces_hash = format!("{:x}", ces.big_phi.to_bits());
+    serde_wasm_bindgen::to_value(&serde_json::json!({ "cesHash": ces_hash }))
+        .map_err(|e| JsValue::from_str(&format!("{e:?}")))
+}
+
+#[cfg(all(test, target_arch = "wasm32"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn calculate_ces_js_returns_ces_hash_object() {
+        let tpm_json = serde_json::json!({
+            "n": 2,
+            "data": [[0.5, 0.5], [0.5, 0.5]]
+        });
+        let result = calculate_ces_js(&tpm_json.to_string(), 0);
+        assert!(result.is_ok());
+        let val: serde_json::Value = serde_wasm_bindgen::from_value(result.unwrap()).unwrap();
+        assert!(val.get("cesHash").is_some());
+        assert!(val["cesHash"].is_string());
+    }
 }
