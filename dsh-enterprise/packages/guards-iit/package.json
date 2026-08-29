@@ -9,16 +9,18 @@
   },
   "dependencies": {
     "@deepseek-ai/cordis": "catalog:cordis",
-    "@deepseek-ai/schemastery": "catalog:schemastery",
-    "@deepseek-ai/dsh-enterprise-utils": "workspace:*"
+    "@deepseek-ai/dsh-enterprise-utils": "workspace:*",
+    "@deepseek-ai/schemastery": "catalog:schemastery"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "*"
   },
   "devDependencies": {
+    "@opentelemetry/api": "^1.9.0",
     "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^4.1.11",
     "typescript": "^5.7.0",
-    "vitest": "^3.0.0"
+    "vitest": "^4.1.11"
   },
   "//": "catalog note: facilityHarness via github:theam/facility#b150d96 is a peer of the repo (pnpm-workspace.yaml catalog), not this leaf"
 }
