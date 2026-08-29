@@ -10,6 +10,7 @@
   "dependencies": {
     "@deepseek-ai/cordis": "catalog:cordis",
     "@deepseek-ai/dsh-enterprise-utils": "workspace:*",
+    "@deepseek-ai/dsh-session": "catalog:dshSession",
     "@deepseek-ai/schemastery": "catalog:schemastery"
   },
   "peerDependencies": {

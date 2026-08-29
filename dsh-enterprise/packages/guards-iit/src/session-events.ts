@@ -4,6 +4,7 @@
  */
 
 import type { GuardId, GuardResult } from './types.js'
+import type { SessionEventMap } from '@deepseek-ai/dsh-session'
 
 declare module '@deepseek-ai/dsh-session' {
   interface SessionEventMap {

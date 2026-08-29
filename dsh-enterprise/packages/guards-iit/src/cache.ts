@@ -29,7 +29,7 @@ export class CesCache {
     if (this.#map.has(key)) {
       this.#map.delete(key)
     } else if (this.#map.size >= CACHE_MAX_SIZE) {
-      const first = this.#map.keys().next().value
+      const first = this.#map.keys().next().value as string
       this.#map.delete(first)
     }
     this.#map.set(key, result)

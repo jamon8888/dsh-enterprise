@@ -36,8 +36,8 @@ export const freeEnergyGuard = {
       freeEnergyHistory.set(sessionId, hist)
     }
 
-    const predicted = ev.phi_predicted ?? (hist.observed.length > 0 ? hist.observed[hist.observed.length - 1] : phi)
-    hist.observed.push(phi)
+    const predicted: number = ev.phi_predicted ?? (hist.observed.length > 0 ? hist.observed[hist.observed.length - 1]! : phi!)
+    hist.observed.push(phi!)
     hist.predicted.push(predicted)
 
     if (hist.observed.length < 3) return { disposition: 'pass', phi }
@@ -48,8 +48,8 @@ export const freeEnergyGuard = {
       hist.sigma2.shift()
     }
 
-    const errors = hist.observed.map((o, i) => o - (hist!.predicted[i]))
-    let sigma2 = hist.sigma2.length > 0 ? hist.sigma2[hist.sigma2.length - 1] : variance(errors)
+    const errors = hist.observed.map((o, i) => o - (hist!.predicted[i] ?? 0))
+    let sigma2: number = hist.sigma2.length > 0 ? (hist.sigma2[hist.sigma2.length - 1] ?? variance(errors)) : variance(errors)
     for (const err of errors.slice(-1)) {
       sigma2 = config.alpha * err * err + (1 - config.alpha) * sigma2
     }

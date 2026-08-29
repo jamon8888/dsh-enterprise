@@ -39,7 +39,7 @@ export const causalEmergenceGuard = {
     const meanRowEntropy = rowEntropies.reduce((a, b) => a + b, 0) / n
     const determinism = 1.0 - meanRowEntropy / Math.log2(n)
 
-    const marginal = tpm[0].map((_, j) => tpm.reduce((s, row) => s + row[j], 0) / n)
+    const marginal = tpm[0]!.map((_, j) => tpm.reduce((s, row) => s + (row[j] ?? 0), 0) / n)
     const marginalEntropy = entropy(marginal)
     const degeneracy = 1.0 - marginalEntropy / Math.log2(n)
 

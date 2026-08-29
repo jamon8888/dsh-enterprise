@@ -73,8 +73,8 @@ function ewsAc1Js(window: number[]): number {
   let da2 = 0
   let db2 = 0
   for (let i = 0; i < a.length; i++) {
-    const da = a[i] - am
-    const db = b[i] - bm
+    const da = a[i]! - am
+    const db = b[i]! - bm
     cross += da * db
     da2 += da * da
     db2 += db * db
