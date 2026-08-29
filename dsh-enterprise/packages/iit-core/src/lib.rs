@@ -6,7 +6,9 @@ pub mod attractor;
 pub mod bindgen;
 pub mod boundary;
 pub mod catastrophe;
+pub mod teloids;
 pub mod tpm;
+pub mod trajectory;
 pub mod workspace;
 
 /// Re-export as `elara` for `elara::Agent` etc.

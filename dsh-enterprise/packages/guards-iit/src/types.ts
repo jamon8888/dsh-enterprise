@@ -20,6 +20,8 @@ export interface GuardResult {
   cesHash?: string
   /** Human-readable block/warn reason. */
   reason?: string
+  /** Violated teloid IDs (effect-ethos). */
+  violated?: string[]
 }
 
 /** Generic guard config zod schema (leaf guards refine this). */
