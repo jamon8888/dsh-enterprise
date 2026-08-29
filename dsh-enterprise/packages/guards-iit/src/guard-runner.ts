@@ -6,6 +6,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import type { Config } from './config.js'
 import { callIctBridge } from './bridge.js'
+import { emitGuardDecision } from './session-events.js'
 import { cesFingerprintGuard } from './guards/ces-fingerprint.js'
 import { boundaryFrontierGuard } from './guards/boundary-frontier.js'
 import { attractorEwsGuard } from './guards/attractor-ews.js'
@@ -79,6 +80,11 @@ export function apply(ctx: Context, cfg: Config): void {
     }
     // phi policy check fires even when no TPM (phi may come pre-evaluated)
     if (typeof phiEv.phi === 'number' && phiEv.phi < cfg.minPhi) {
+      emitGuardDecision(ctx, 'phi-threshold', {
+        disposition: 'block',
+        phi: phiEv.phi,
+        reason: `phi ${phiEv.phi} < minPhi ${cfg.minPhi}`,
+      })
       throw new GuardError(`phi ${phiEv.phi} < minPhi ${cfg.minPhi}`)
     }
     const hasTpm = e?.tpm !== undefined && e?.state !== undefined
@@ -86,14 +92,21 @@ export function apply(ctx: Context, cfg: Config): void {
       if (!hasTpm && TPM_DEPENDENT.has(guard.id)) continue
       const result = (await guard.run(ctx, cfg as any, e as any)) as import('./types.js').GuardResult
       if (result.disposition === 'block') {
+        emitGuardDecision(ctx, guard.id, result)
         throw new GuardError((result as import('./types.js').GuardResult).reason ?? `Guard ${guard.id} blocked`)
       }
+      emitGuardDecision(ctx, guard.id, result)
     }
   }
 
   // ctx.on hook to emit policy/evaluate before phi check (for direct callers)
   ctx.on('policy/evaluate', async (ev: any, next: any) => {
     if (typeof ev.phi === 'number' && typeof ev.minPhi === 'number' && ev.phi < ev.minPhi) {
+      emitGuardDecision(ctx, 'phi-threshold', {
+        disposition: 'block',
+        phi: ev.phi,
+        reason: `phi ${ev.phi} < minPhi ${ev.minPhi}`,
+      })
       throw new GuardError(`phi ${ev.phi} < minPhi ${ev.minPhi}`)
     }
     return next(ev)
