@@ -28,6 +28,7 @@ export const freeEnergyGuard = {
     const sessionId = ev.sessionId ?? 'default'
     const phi = ev.phi
     if (typeof phi !== 'number') return { disposition: 'pass' }
+    if (phi < config.minPhi) return { disposition: 'pass', phi }
 
     let hist = freeEnergyHistory.get(sessionId)
     if (!hist) {
@@ -44,6 +45,7 @@ export const freeEnergyGuard = {
     if (hist.observed.length > config.window) {
       hist.observed.shift()
       hist.predicted.shift()
+      hist.sigma2.shift()
     }
 
     const errors = hist.observed.map((o, i) => o - (hist!.predicted[i]))
