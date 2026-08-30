@@ -5,7 +5,6 @@
 
 import type { Context } from '@deepseek-ai/cordis'
 import type { Config } from './config.js'
-import { callIctBridge } from './bridge.js'
 import { emitGuardDecision } from './session-events.js'
 import { CesCache } from './cache.js'
 import { recordPhi, recordLatency, recordEws } from './telemetry.js'
@@ -103,7 +102,6 @@ export function apply(ctx: Context, cfg: Config): void {
       }
       return mod.teloids_evaluate_wasm(compiledJson, actionJson)
     },
-    runCusp: async (traj: unknown) => callIctBridge('/catastrophe/fit', { traj }),
   }))
 
   const tools: Record<string, unknown> = ctx.tools as unknown as Record<string, unknown>

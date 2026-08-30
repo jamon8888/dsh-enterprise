@@ -1,14 +1,12 @@
 /**
  * catastrophe-cusp guard — warns at `distance < bifurcationMargin` (default 0.2),
- * blocks when `distance < 0` (inside cusp). Bridges to Rust `catastrophe.rs` WASM
- * `CuspFit.from_trajectory`, falls back to `callIctBridge('/catastrophe/fit')`
- * if WASM not yet has `CuspFit`, then JS pure fallback (same as catastrophe.rs).
+ * blocks when `distance < 0` (inside cusp). Uses Rust `catastrophe.rs` WASM
+ * `CuspFit.from_trajectory` when available; falls back to pure JS `cuspFitJs`.
  * @module @deepseek-ai/dsh-enterprise-guards-iit/guards/catastrophe-cusp
  */
 
 import z from '@deepseek-ai/schemastery'
 import { GuardError } from '../guard-runner.js'
-import { callIctBridge } from '../bridge.js'
 
 export const catastropheCuspGuard = {
   id: 'catastrophe-cusp' as const,
@@ -32,22 +30,7 @@ export const catastropheCuspGuard = {
         hysteresis = (fit as { hysteresis?: boolean }).hysteresis
       }
     } catch {
-      // WASM not available — try bridge
-    }
-
-    if (distance === undefined) {
-      try {
-        const res = await callIctBridge('/catastrophe/fit', { traj: event.trajectory }) as {
-          distance_to_bifurcation?: number
-          distanceToBifurcation?: number
-          distance?: number
-          hysteresis?: boolean
-        }
-        distance = res?.distance_to_bifurcation ?? res?.distanceToBifurcation ?? res?.distance
-        hysteresis = res?.hysteresis ?? hysteresis
-      } catch {
-        // sidecar not running (dev) — JS fallback
-      }
+      // WASM not available — fall through to pure JS
     }
 
     if (distance === undefined) {
