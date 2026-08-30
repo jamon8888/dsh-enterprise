@@ -1,9 +1,0 @@
-# Default Helm values — cloud
-imageRegistry: ghcr.io
-pg:
-  host: postgres
-r2:
-  endpoint: https://r2.cloudflarestorage.com
-  region: eu-west-1
-gateway:
-  allowedRegions: [eu-west-1]
