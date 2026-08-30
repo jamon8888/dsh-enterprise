@@ -1,0 +1,87 @@
+version: '1'
+plugins:
+  # === Flagship: IIT Consciousness Guards ===
+  - id: guards-iit
+    name: '@deepseek-ai/dsh-enterprise-guards-iit'
+
+  # === Observability ===
+  - id: dsh-otel
+    name: '@deepseek-ai/dsh-enterprise-otel'
+
+  - id: dsh-cost-tracker
+    name: '@deepseek-ai/dsh-enterprise-cost-tracker'
+
+  - id: dsh-sla-monitor
+    name: '@deepseek-ai/dsh-enterprise-sla-monitor'
+
+  # === Security ===
+  - id: dsh-secrets
+    name: '@deepseek-ai/dsh-enterprise-secrets'
+
+  - id: dsh-audit-log
+    name: '@deepseek-ai/dsh-enterprise-dsh-audit-log'
+
+  - id: dsh-permissions
+    name: '@deepseek-ai/dsh-enterprise-dsh-permissions'
+
+  - id: auth
+    name: '@deepseek-ai/dsh-enterprise-auth'
+
+  - id: dsh-policy-engine
+    name: '@deepseek-ai/dsh-enterprise-dsh-policy-engine'
+
+  # === Compliance ===
+  - id: compliance-erasure
+    name: '@deepseek-ai/dsh-enterprise-compliance-erasure'
+
+  - id: sovereignty
+    name: '@deepseek-ai/dsh-enterprise-sovereignty'
+    disabled: true
+
+  # === Release & Ops ===
+  - id: dsh-release
+    name: '@deepseek-ai/dsh-enterprise-dsh-release'
+    disabled: true
+
+  - id: dsh-pr-agent
+    name: '@deepseek-ai/dsh-enterprise-dsh-pr-agent'
+    disabled: true
+
+  - id: dsh-git-worktree
+    name: '@deepseek-ai/dsh-enterprise-dsh-git-worktree'
+
+  - id: sbom
+    name: '@deepseek-ai/dsh-enterprise-sbom'
+    disabled: true
+
+  # === Knowledge ===
+  - id: dsh-library
+    name: '@deepseek-ai/dsh-enterprise-dsh-library'
+
+  - id: kb-rag
+    name: '@deepseek-ai/dsh-enterprise-kb-rag'
+    disabled: true
+
+  - id: model-registry
+    name: '@deepseek-ai/dsh-enterprise-model-registry'
+
+  # === Reliability ===
+  - id: resilience
+    name: '@deepseek-ai/dsh-enterprise-resilience'
+
+  - id: dsh-mneme
+    name: '@deepseek-ai/dsh-enterprise-dsh-mneme'
+    disabled: true
+
+  - id: dsh-model-router
+    name: '@deepseek-ai/dsh-enterprise-model-router'
+    disabled: true
+
+  # === AI/LLM ===
+  - id: dsh-local-llm
+    name: '@deepseek-ai/dsh-enterprise-local-llm'
+    disabled: true
+
+  # === Utilities ===
+  - id: utils
+    name: '@deepseek-ai/dsh-enterprise-utils'

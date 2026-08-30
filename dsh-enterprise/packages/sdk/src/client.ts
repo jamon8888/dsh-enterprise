@@ -84,7 +84,8 @@ export function createEnterprise(opts: CreateEnterpriseOpts): EnterpriseClient {
           const r = await svc.createSignal(input)
           return r as { chainId: ChainId; signal: unknown }
         }
-        // library fallback: try @facility/harness direct (ESM dynamic import)
+        // ponytail: in-memory stub acceptable — real chains come from @facility/harness/chains
+        // when github:theam/facility#b150d96 is published as proper npm package (not git SHA)
         try {
           // @ts-ignore — optional peer @facility/harness not declared in sdk package.json (catalog:facilityHarness)
           const harness = await import('@facility/harness/chains')
