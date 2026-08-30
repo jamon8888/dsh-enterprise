@@ -1,0 +1,15 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-dsh-permissions",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise permissions — RBAC 4-eyes SoD (Cordis plugin)",
+  "license": "MIT OR Apache-2.0",
+  "exports": { ".": { "types": "./lib/types/index.d.ts", "default": "./lib/index.js" } },
+  "files": ["lib/"],
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis",
+    "@deepseek-ai/schemastery": "catalog:schemastery"
+  },
+  "peerDependencies": { "@deepseek-ai/cordis": "*" },
+  "devDependencies": { "vitest": "^3", "typescript": "^5.9.3" }
+}

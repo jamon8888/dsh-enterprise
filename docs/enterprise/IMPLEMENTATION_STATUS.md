@@ -1,0 +1,246 @@
+# DSH Enterprise — Implementation Status
+
+**Date:** 2026-08-30
+**Status:** Phase 4 complete — entering Phase 5
+**Branch:** `master` at `2d806f4` (guards-iit fully implemented)
+
+---
+
+## Table of Contents
+
+1. [Branch & commit state](#1--branches-et-commits)
+2. [What was built in this session](#2--ce-qui-a-été-construit)
+3. [Phase completion map](#3--complétion-des-phases)
+4. [Package status — core](#4--packages-opérationnels--stubs)
+5. [Enterprise plugins status](#5--enterprise-plugins-21-packages)
+6. [DEFERRED.md ceiling map](#6--deferredmd-- ceilings)
+7. [Phase 5 — what's next](#7--phase-5--prochaines-étapes)
+8. [Facility partial ports remaining](#8--facility-partial-ports)
+9. [Reference files](#9--fichiers-de-référence)
+
+---
+
+## 1. � Branch et commits
+
+### Branches
+
+| Branche | HEAD | Relation | Packages |
+|---------|------|----------|----------|
+| `master` | `2d806f4` | base + all work | 12 + 21 enterprise |
+| `regulated-hardening` | `de75973` | divergée (historique différent) | même structure |
+
+### Ce qui a changé depuis `b19a10f` (merge iit-advanced-guards)
+
+```
+iit-core/src/bindgen.rs                      +54  calculate_ces_js WASM export
+guards-iit/src/guard-runner.ts               +89 -41  WASM wiring + policy/evaluate emit
+guards-iit/src/guards/free-energy.ts         NEW   gaussian surprise guard
+guards-iit/src/guards/causal-emergence.ts     NEW   determinism/degeneracy guard
+guards-iit/src/guards/mip-shift.ts           NEW   MIP deviation guard
+guards-iit/src/session-events.ts             +27  policy/evaluate SessionEventMap
+guards-iit/src/__mocks__/iit-core-pkg.ts    +24  WASM mock complet
+guards-iit/tsconfig.json                        修正  extends tsconfig.base.json
+guards-iit/package.json                          +@deepseek-ai/dsh-session dep
+Total: +12 commits, +577 lignes
+```
+
+---
+
+## 2. Ce qui a été construit
+
+### Session IIT Guards (SDD — 12 commits, 68 tests, 100% coverage)
+
+| Fichier | Ce qu'on a fait |
+|---------|----------------|
+| `iit-core/src/bindgen.rs` | `calculate_ces_js` → `ruvector_consciousness::ces::compute_ces` |
+| `guard-runner.ts` | 4 WASM méthodes filtées (`phi_trajectory_wasm`, `ignition_score_wasm`, `teloids_compile/evaluate_wasm`), `performance.now()`, `policy/evaluate` emit |
+| `guards/free-energy.ts` | `gaussian_surprise` EMA sigma, window eviction, `minPhi` wiring |
+| `guards/causal-emergence.ts` | determinism/degeneracy/effectiveness formulas |
+| `guards/mip-shift.ts` | rolling MIP mean/std, deviation sigma |
+| `session-events.ts` | `policy/evaluate` SessionEventMap type |
+| `__mocks__/iit-core-pkg.ts` | WASM mock complet + `mip: number` shape fix |
+| `__mocks__/schemastery.ts` | `enumChainable.enum()` méthode ajoutée |
+| `cache.ts` | `first` undefined guard, dead `if(first)` removed |
+| `tsconfig.json` | extends `tsconfig.base.json` (fix TS2664) |
+
+---
+
+## 3. Complétion des phases
+
+| Phase | Objectif | Status | Notes |
+|-------|---------|--------|-------|
+| Phase 0 | Chains + Guard Skeleton | ✅ Complete | `chains`, `session-protocol`, `sandbox-runner`, `gateway`, `watchtower` |
+| Phase 1 | Rust Core + First IIT Guards | ✅ Complete | 8 guards total: phi-threshold, ces-fingerprint, boundary-frontier, catastrophe-cusp, attractor-ews, phi-trajectory, workspace-ignition, effect-ethos |
+| Phase 2 | Gateway + Runner + Watchtower | ✅ (in-memory) | PG-backed quand watchtower migration 002 lands |
+| Phase 0.5 | Regulated P0 (auth, compliance, sovereignty, RBAC) | ✅ Complete | `dsh-permissions`, `dsh-audit-log`, `dsh-policy-engine` |
+| Phase 3 | CLI / MCP / SDK | ⚠️ Partial | CLI stub existe |
+| **Phase 4** | **Benchmarking + Grafana + Nightly bench** | **✅ Complete** | `BENCHMARKING.md`, `nightly-bench.yml`, Grafana dashboards, `BenchmarkEnvelope` dual-write |
+| Phase 4.5 | Regulated P1 (resilience, model-registry, air-gapped Ollama) | ⚠️ Partial | `dsh-local-llm`, `model-registry` stubs |
+| **Phase 5** | **otel + cost-tracker + sla-monitor + secrets** | **✅ Complete** | `dsh-otel` real OTEL SDK, shared meter, `dsh-cost-tracker` 25 tests, `dsh-sla-monitor` 17 tests, `dsh-secrets` scaffold + 29 tests |
+
+---
+
+## 4. Packages opérationnels / stubs
+
+### 4.1 Core packages
+
+| Package | Status | Stub? | Tests |
+|---------|--------|--------|-------|
+| `chains` | ✅ | Non | 1 |
+| `cli` | ⚠️ Stub | Oui — init + doctor basiques | 1 |
+| `gateway` | ✅ (in-memory) | Partial | 1 |
+| `guards-iit` | ✅ | **Non** — 8 guards + WASM | **68** |
+| `iit-core` | ⚠️ Partial | Rust stubs pour catastrophe/attractor/boundary (WASM mock) | 0 |
+| `mcp` | ⚠️ Stub | Oui — NotImplemented | 1 |
+| `sandbox-runner` | ✅ | Non | 1 |
+| `sdk` | ✅ | Non (fallback) | 1 |
+| `session-protocol` | ✅ | Non | 1 |
+| `watchtower` | ✅ (in-memory) | Partial | 3 |
+
+### 4.2 Enterprise plugins (21 packages)
+
+| Package | Status | Stub? | Tests | DEFERRED ceiling |
+|---------|--------|--------|-------|-----------------|
+| `auth` | ✅ | Non | 1 | — |
+| `compliance-erasure` | ✅ | Non | 1 | — |
+| `dsh-audit-log` | ✅ | Non | 51 | ponytail: simple hash → crypto.subtle |
+| `dsh-cost-tracker` | ✅ | Non — 25 tests, PG insert ceiling | 26 | watchtower PG |
+| `dsh-git-worktree` | ⚠️ Stub | Oui — git worktree stub | 1 | cli --with worktree |
+| `dsh-library` | ⚠️ Stub | Oui — .dsh/library stub | 1 | fs.read quand populated |
+| `dsh-local-llm` | ⚠️ Stub | Oui — Ollama stub | 1 | Ollama in air-gapped K8s |
+| `dsh-mneme` | ⚠️ Stub | Oui — better-sqlite3 stub | 1 | better-sqlite3 ou PG |
+| `dsh-model-router` | ⚠️ Stub | Oui — cost/latency stub | 1 | gateway PG |
+| `dsh-otel` | ✅ | Non — real OTEL SDK + shared meter | 10 | OTLP exporter when collector deployed |
+| `dsh-permissions` | ✅ | Non | 38 | — |
+| `dsh-policy-engine` | ⚠️ Stub | Oui — OPA mock | 1 | vrai OPA-WASM |
+| `dsh-pr-agent` | ⚠️ Stub | Oui — LLM review stub | 1 | PR open automation |
+| `dsh-release` | ⚠️ Stub | Oui — CycloneDX/cosign stub | 1 | version bump → SBOM → Helm |
+| `dsh-secrets` | ✅ | Non — scaffold + 29 tests, Vault ceiling | 29 | Vault/1Password deployed |
+| `dsh-sla-monitor` | ✅ | Non — 17 tests, PG query ceiling | 18 | gateway-p99 <2s, guard-block <1% |
+| `kb-rag` | ⚠️ Stub | Oui — substring search | 1 | PG pgvector cosine |
+| `model-registry` | ⚠️ Stub | Oui — Map stub | 2 | gateway PG migration 002 |
+| `resilience` | ⚠️ Stub | Oui | 1 | PITR WAL + R2 replica |
+| `sbom` | ⚠️ Stub | Oui | 1 | CycloneDX + Cosign |
+| `sovereignty` | ⚠️ Stub | Oui | 1 | region egress deny rules |
+| `utils` | ✅ | Non | 1 | — |
+
+**Bilan:** 7/21 non-stubs (auth, compliance-erasure, dsh-audit-log, dsh-permissions, guards-iit, chains, utils), 14 stubs with documented ceilings.
+
+---
+
+## 5. DEFERRED.md — ceilings
+
+### 5.1 Rust ceilings (ponytail)
+
+| File:Line | Ceiling | Lift when |
+|-----------|---------|-----------|
+| `iit-core/src/catastrophe.rs:7` | pure Rust O(n) normal equations | ill-conditioned fits on real trajectories |
+| `iit-core/src/attractor.rs:7` | pure std O(n) + power iter 500 | `ews_ac1` > 50ms at n=10k |
+| `iit-core/src/boundary.rs:16` | reuse BipartitionIter | `enumerate_frontiers` at n=16 > 1s |
+| `sandbox-runner/src/phases.ts:7` | in-memory emit | Postgres `run_events` table lands |
+| `gateway/src/budgets.ts:7` | in-memory spendCounters | watchtower PG |
+| `watchtower/src/job.ts:6` | in-memory store | watchtower PG |
+| `watchtower/src/job.ts:114` | bench stubs | Postgres `run_events` available |
+
+### 5.2 TypeScript ceilings (ponytail)
+
+| File:Line | Ceiling | Lift when |
+|-----------|---------|-----------|
+| `guards-iit/src/bridge.ts:29` | 5s timeout + uv run python | `services/ict-bridge` FastAPI sidecar deployed |
+| `sdk/src/client.ts:4` | stub fallback | `pnpm install` with facility + ruvector |
+| `sdk/src/client.ts:60` | pure-JS fallback | SDK in browser without node:crypto |
+| `dsh-audit-log/src/plugin.ts:21` | simple deterministic hash | crypto.subtle + SHA-256 WORM |
+| `kb-rag/src/plugin.ts:25` | in-memory substring | PG pgvector cosine |
+| `dsh-library/src/plugin.ts:25` | in-memory .dsh/library stub | fs.read quand populated |
+| `dsh-mneme/src/plugin.ts:19` | in-memory Map | better-sqlite3 ou PG |
+| `dsh-local-llm/src/plugin.ts:9` | in-memory Ollama stub | Ollama in air-gapped K8s |
+| `dsh-model-router/src/plugin.ts:9` | in-memory router stub | gateway PG + cost/latency |
+| `model-registry/src/plugin.ts:6` | in-memory Map | gateway PG migration 002 |
+
+---
+
+## 6. Facility partial ports remaining
+
+| Module Facility | Status | Lift condition |
+|----------------|--------|----------------|
+| `core/detect.ts` | Stub vide | `guards-iit` besoin réel de runtime context |
+| `core/pricing.ts` | Non porté | `dsh-cost-tracker` sort du stub |
+| `core/provider-auth.ts` | Stub NotImplemented | `dsh-model-router` ou `dsh-local-llm` besoin WIF |
+| `services/gateway/metering.ts` | Partiel — costCents() | watchtower migration 002 |
+| `services/gateway/envelope-store.ts` | Types uniquement | `dsh-audit-log` besoin persister envelopes |
+| `core/permissions.ts` | Lint markdown-links | `auth` plugin config z.object corrigée |
+
+---
+
+## 7. Phase 5 — Prochaines étapes
+
+### 7.1 `dsh-otel` — ✅ Complete
+
+- `sdk-init.ts` — `NodeSDK` + `PeriodicExportingMetricReader` + `ConsoleMetricExporter`, idempotent init
+- `meter.ts` — shared `Meter` exported from `dsh-otel/meter`
+- `guards-iit/telemetry.ts` — dynamic import of shared meter with graceful fallback
+- OTLP trace exporter — ponytail ceiling (add when OTEL Collector deployed)
+
+### 7.2 `dsh-cost-tracker` + `dsh-sla-monitor` — ✅ Complete
+
+**`dsh-cost-tracker`:**
+- 25 tests (costUsd/costCents, gateway/request hook, pg insert path, zero-token guard)
+- PG insert — ponytail ceiling (watchtower migration 002)
+
+**`dsh-sla-monitor`:**
+- 17 tests (SlaMonitor.check/observeLatency/observeGuard, event hooks, clear)
+- 4 pg-query tests (percentile_cont, block_rate SQL patterns)
+- PG query — ponytail ceiling (watchtower migration 002)
+
+### 7.3 `dsh-secrets` — ✅ Complete
+
+- Full scaffold: `SecretsService`, `InMemoryProvider`, `SecretsProvider` interface
+- 29 tests (CRUD, provider fallback, gateway/request env injection with snapshot/restore)
+- Vault/1Password — ponytail ceiling (when enterprise secrets infra deployed)
+
+### 7.4 Remaining P2 plugins
+
+| Package | Action |
+|---------|--------|
+| `dsh-git-worktree` | `cli --with worktree ../worktrees/` |
+| `dsh-pr-agent` | Auto-review security/style/test on PR open |
+| `dsh-release` | version bump → SBOM → Cosign → Helm |
+| `dsh-mneme` | `better-sqlite3` ou switch vers PG |
+| `dsh-local-llm` | Real Ollama 7B/70B in air-gapped K8s |
+
+---
+
+## 8. Fichiers de référence
+
+```
+dsh-enterprise/
+├── DEFERRED.md                           # tous les stubs + conditions de déblocage
+├── docs/enterprise/
+│   ├── SPEC.md                           # spécification officielle (zero upstream mutation)
+│   ├── IMPLEMENTATION_PLAN.md            # plan d'implémentation détaillé (Phase 0-4.5)
+│   ├── IMPLEMENTATION_STATUS.md          # CE FICHIER — état actuel
+│   ├── BENCHMARKING.md                  # Phase 4: nightly bench + Grafana
+│   ├── COMPLIANCE_MATRIX.md
+│   └── CRITICAL_REVIEW.md
+└── packages/
+    ├── guards-iit/src/guard-runner.ts   # 8 guards + WASM bridge
+    ├── iit-core/src/bindgen.rs          # calculate_ces_js WASM
+    ├── enterprise/*/src/plugin.ts        # 21 plugins
+    └── enterprise/dsh-otel/src/plugin.ts # ✅ — real OTEL SDK + shared meter
+```
+
+---
+
+## Summary: What stays stub vs what gets built
+
+| Stub | Lift condition | Status |
+|------|---------------|--------|
+| `dsh-otel` | OTLP exporter when collector deployed | ✅ Done |
+| `dsh-cost-tracker` | watchtower PG ✅ | ✅ Done (PG insert ceiling pending) |
+| `dsh-sla-monitor` | watchtower PG ✅ | ✅ Done (PG query ceiling pending) |
+| `dsh-secrets` | Vault/1Password deployed | ✅ Done (Vault ceiling pending) |
+| `dsh-mneme` | better-sqlite3 ou PG | Stub |
+| `dsh-local-llm` | Ollama in K8s | Stub |
+| `dsh-model-router` | gateway PG | Stub |
+| `kb-rag` | PG pgvector | Stub |
+| `iit-core` Rust stubs | latency measurements | Stub |

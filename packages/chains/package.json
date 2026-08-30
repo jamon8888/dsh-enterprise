@@ -1,0 +1,31 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-chains",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise chains — Cordis plugin importing @facility/harness chains (library install, no copy)",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./types": {
+      "types": "./lib/types/types.d.ts",
+      "default": "./lib/types/types.js"
+    }
+  },
+  "files": ["lib/"],
+  "dependencies": {
+    "@facility/harness": "catalog:facilityHarness",
+    "@deepseek-ai/dsh-session": "catalog:dshSession",
+    "@deepseek-ai/cordis": "catalog:cordis",
+    "@deepseek-ai/schemastery": "catalog:schemastery"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "vitest": "^3",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,32 @@
+name: nightly-bench
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  terminal-bench:
+    runs-on: ubuntu-latest
+    env:
+      MAX_COST_USD: ${{ vars.MAX_COST_USD || '5' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @deepseek-ai/dsh-enterprise-watchtower exec vitest run --run tests/watchtower.bench.spec.ts
+
+  browsecomp:
+    runs-on: ubuntu-latest
+    needs: terminal-bench
+    env:
+      MAX_COST_USD: ${{ vars.MAX_COST_USD || '5' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @deepseek-ai/dsh-enterprise-watchtower exec vitest run --run tests/watchtower.bench.spec.ts

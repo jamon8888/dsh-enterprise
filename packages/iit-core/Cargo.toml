@@ -1,0 +1,33 @@
+[package]
+name = "dsh-enterprise-iit-core"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+description = "MIT IIT/ICT causal core for DSH Enterprise — ruvector + elara"
+repository = "https://github.com/your-org/dsh-enterprise"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "dsh_enterprise_iit_core"
+
+[dependencies]
+ruvector-consciousness = { version = "2.1", features = ["phi", "emergence", "collapse", "wasm"] }
+elara-active-inference = "0.1"
+wasm-bindgen = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+serde-wasm-bindgen = "0.6"
+getrandom = { version = "0.2", features = ["js"] }
+
+[features]
+default = []
+wasm = []
+
+[lints.rust]
+unsafe_code = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"

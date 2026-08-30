@@ -1,0 +1,14 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-sla-monitor",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise sla-monitor — SLO gateway-p99 2s, guard-block-rate 1% (Cordis plugin)",
+  "license": "MIT OR Apache-2.0",
+  "exports": { ".": { "types": "./lib/types/index.d.ts", "default": "./lib/index.js" } },
+  "files": ["lib/"],
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis"
+  },
+  "peerDependencies": { "@deepseek-ai/cordis": "*" },
+  "devDependencies": { "vitest": "^3", "typescript": "^5.9.3" }
+}

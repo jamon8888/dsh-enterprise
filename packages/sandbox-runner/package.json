@@ -1,0 +1,22 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-sandbox-runner",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise sandbox runner — phased runner reimplementation (facility/runner/src/phases.ts not a publishable package)",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis",
+    "@deepseek-ai/schemastery": "catalog:schemastery"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}
