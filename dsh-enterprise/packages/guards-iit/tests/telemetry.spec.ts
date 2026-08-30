@@ -3,6 +3,10 @@ import { recordPhi, recordEws, recordLatency } from '../src/telemetry.js'
 
 const mockRecord = vi.hoisted(() => vi.fn())
 
+vi.mock('@deepseek-ai/dsh-enterprise-otel/meter', () => {
+  throw new Error('otel mock: no meter')
+})
+
 vi.mock('@opentelemetry/api', () => ({
   metrics: {
     getMeter: () => ({
