@@ -107,6 +107,7 @@ export function apply(ctx: any): void {
     }
   })
 
+  // ponytail: PG query for historical p99 when watchtower PG migration 002 lands
   // guard/block rate
   ctx.on('guard/block', async (ev: any, next: any) => {
     try {
