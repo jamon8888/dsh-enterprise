@@ -22,5 +22,39 @@ export function teloids_evaluate_wasm(_compiledJson: string, _actionJson: string
 // enumerate_frontiers / best_frontier intentionally NOT exported so boundary guard falls back to iitGuards (mirrors todo!() stub)
 // export function enumerate_frontiers / best_frontier — uncomment when boundary.rs WASM exports are ready
 // ews_variance / ews_ac1 intentionally NOT exported so guards fall back to JS pure (mirrors missing WASM exports)
-// Intentionally omit CuspFit so guard falls back to bridge -> JS pure; if you need WASM path, uncomment below
-// export const CuspFit = { ... }
+export const CuspFit = {
+  from_trajectory: (traj: number[]): { distance_to_bifurcation: number; hysteresis: boolean } => {
+    if (!traj || traj.length === 0) return { distance_to_bifurcation: 0, hysteresis: false }
+    const xs = traj.filter((v) => Number.isFinite(v))
+    if (xs.length === 0) return { distance_to_bifurcation: 0, hysteresis: false }
+    const n = xs.length
+    let sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0
+    for (const x of xs) {
+      const x2 = x * x
+      sumX += x
+      sumX2 += x2
+      sumX3 += x2 * x
+      sumX4 += x2 * x2
+    }
+    const det = n * sumX2 - sumX * sumX
+    let alpha: number, beta: number
+    if (Math.abs(det) < 1e-12 || !Number.isFinite(det)) {
+      alpha = -sumX2 / n; beta = -sumX3 / n
+    } else {
+      const c0 = (n * sumX4 - sumX * sumX3) / det
+      const c1 = (sumX2 * sumX3 - sumX * sumX4) / det
+      alpha = -c0; beta = -c1
+      if (!Number.isFinite(alpha) || !Number.isFinite(beta)) { alpha = -sumX2 / n; beta = -sumX3 / n }
+    }
+    const distance_to_bifurcation = 4 * alpha ** 3 + 27 * beta ** 2
+    let hysteresis = false
+    if (distance_to_bifurcation < 0) {
+      const min = Math.min(...xs), max = Math.max(...xs), range = max - min
+      const mean = sumX / n
+      const variance = xs.reduce((a, b) => a + (b - mean) ** 2, 0) / n
+      const std = Math.sqrt(variance)
+      if (Number.isFinite(std) && std > 1e-12 && Number.isFinite(range)) hysteresis = range > 0.5 * std
+    }
+    return { distance_to_bifurcation, hysteresis }
+  },
+}
