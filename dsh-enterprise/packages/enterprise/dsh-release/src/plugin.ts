@@ -3,6 +3,8 @@
  * @module @deepseek-ai/dsh-enterprise-dsh-release/plugin
  */
 
+// ponytail: CLI-based (syft/cosign); stubs when tools absent; upgrade path = install tools
+
 import { execSync } from 'node:child_process'
 
 export interface ReleaseOptions {

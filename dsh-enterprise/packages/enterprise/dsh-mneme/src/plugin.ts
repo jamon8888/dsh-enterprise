@@ -83,8 +83,7 @@ export class MnemeStore {
   async recent(n: number): Promise<MnemeEntry[]> {
     if (this.db) {
       try {
-        // ponytail: LIMIT uses string interpolation (n is test-controlled, not user input)
-        const rows = this.db.prepare(`SELECT k,v,ts FROM mneme ORDER BY ts DESC LIMIT ${n}`).all() as MnemeEntry[]
+        const rows = this.db.prepare('SELECT k,v,ts FROM mneme ORDER BY ts DESC LIMIT ?').all(n) as MnemeEntry[]
         return rows
       } catch {}
     }
