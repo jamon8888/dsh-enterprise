@@ -3,6 +3,7 @@
  * @module @deepseek-ai/dsh-enterprise-otel/plugin
  */
 import * as api from '@opentelemetry/api'
+import { initOtel } from './sdk-init.js'
 
 export const name = 'dsh-enterprise:dsh-otel'
 export const inject = [] as const
@@ -12,6 +13,7 @@ export type OtelService = {
 }
 
 export function apply(ctx: any): void {
+  initOtel()
   const svc: OtelService = {
     trace: (name: string, fn: (span: api.Span) => unknown) =>
       api.trace.getTracer('dsh-enterprise').startActiveSpan(name, fn as any),

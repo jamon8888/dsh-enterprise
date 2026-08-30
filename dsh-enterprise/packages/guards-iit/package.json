@@ -11,12 +11,20 @@
     "@deepseek-ai/cordis": "catalog:cordis",
     "@deepseek-ai/dsh-enterprise-utils": "workspace:*",
     "@deepseek-ai/dsh-session": "catalog:dshSession",
-    "@deepseek-ai/schemastery": "catalog:schemastery"
+    "@deepseek-ai/schemastery": "catalog:schemastery",
+    "@opentelemetry/api": "^1.9.0"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "*"
+    "@deepseek-ai/cordis": "*",
+    "@deepseek-ai/dsh-enterprise-otel": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-enterprise-otel": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@deepseek-ai/dsh-enterprise-otel": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^4.1.11",
