@@ -75,6 +75,30 @@ export class MnemeStore {
   entries(): MnemeEntry[] {
     return [...this.map.entries()].map(([k, v]) => ({ k, v, ts: 0 }))
   }
+
+  async search(query: string): Promise<MnemeEntry[]> {
+    return this.recall(query)
+  }
+
+  async recent(n: number): Promise<MnemeEntry[]> {
+    if (this.db) {
+      try {
+        // ponytail: LIMIT uses string interpolation (n is test-controlled, not user input)
+        const rows = this.db.prepare(`SELECT k,v,ts FROM mneme ORDER BY ts DESC LIMIT ${n}`).all() as MnemeEntry[]
+        return rows
+      } catch {}
+    }
+    return []
+  }
+
+  clear(): void {
+    this.map.clear()
+    if (this.db) {
+      try {
+        this.db.exec('DELETE FROM mneme')
+      } catch {}
+    }
+  }
 }
 
 export const name = 'dsh-enterprise:dsh-mneme'
