@@ -25,14 +25,14 @@ export class GitWorktreeService {
     return parseWorktreeList(stdout)
   }
 
-  async add(branch: string, path: string): Promise<void> {
-    const args = ['worktree', 'add', '-b', branch, path]
+  async add(path: string, newBranch: string): Promise<void> {
+    const args = ['worktree', 'add', '-b', newBranch, path]
     const { stderr, exitCode } = await git(args, this.cwd)
     if (exitCode !== 0) throw new Error(stderr)
   }
 
-  async addFrom(branch: string, path: string): Promise<void> {
-    const args = ['worktree', 'add', path, branch]
+  async addFrom(path: string, existingBranch: string): Promise<void> {
+    const args = ['worktree', 'add', path, existingBranch]
     const { stderr, exitCode } = await git(args, this.cwd)
     if (exitCode !== 0) throw new Error(stderr)
   }

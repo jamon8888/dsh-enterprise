@@ -86,7 +86,7 @@ describe('dsh-git-worktree', () => {
   it('add() — creates new worktree with new branch', async () => {
     const wtPath = `/tmp/test-wt-add1-${uuid}`
     const svc = new GitWorktreeService(TEST_DIR)
-    await svc.add(`feature/add1-${uuid}`, wtPath)
+    await svc.add(wtPath, `feature/add1-${uuid}`)
     try {
       const entries = await svc.list()
       const found = entries.find((e) => e.path === wtPath)
@@ -102,7 +102,7 @@ describe('dsh-git-worktree', () => {
     await execPromise(`git branch "${branchName}"`, TEST_DIR)
     const wtPath = `/tmp/test-wt-from-existing-${uuid}`
     const svc = new GitWorktreeService(TEST_DIR)
-    await svc.addFrom(branchName, wtPath)
+    await svc.addFrom(wtPath, branchName)
     try {
       const entries = await svc.list()
       const found = entries.find((e) => e.path === wtPath)
@@ -118,9 +118,9 @@ describe('dsh-git-worktree', () => {
     const wtPath1 = `/tmp/test-wt-dupe1-${uuid}`
     const wtPath2 = `/tmp/test-wt-dupe2-${uuid}`
     const svc = new GitWorktreeService(TEST_DIR)
-    await svc.add(branchName, wtPath1)
+    await svc.add(wtPath1, branchName)
     try {
-      await expect(svc.add(branchName, wtPath2)).rejects.toThrow()
+      await expect(svc.add(wtPath2, branchName)).rejects.toThrow()
     } finally {
       await rm(wtPath1, { recursive: true, force: true }).catch(() => {})
     }
