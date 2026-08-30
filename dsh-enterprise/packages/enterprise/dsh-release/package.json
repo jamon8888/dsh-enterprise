@@ -1,0 +1,25 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-dsh-release",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise dsh-release — CycloneDX SBOM generation + cosign signing (Cordis plugin)",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib/"
+  ],
+  "dependencies": {},
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "vitest": "^3",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.0.0"
+  }
+}
