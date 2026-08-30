@@ -148,17 +148,27 @@ describe('dsh-secrets', () => {
       svc.set('A', '1')
       svc.set('B', '2')
       const keys = svc.list()
-      expect(keys).toContain('A')
-      expect(keys).toContain('B')
+      expect(keys).toEqual(['A', 'B'])
     })
 
-    it('clear removes all secrets', () => {
-      const svc = new SecretsService()
+    it('clear removes all secrets and cleans process.env via gateway/request injection', async () => {
+      const { ctx, services } = mockCtx()
+      apply(ctx)
+      const svc = services['secrets'] as SecretsService
       svc.set('A', '1')
       svc.set('B', '2')
+      let envDuringRequest: Record<string, string | undefined> = {}
+      await ctx.waterfall('gateway/request', {}, async (ev: any) => {
+        envDuringRequest = { A: process.env['A'], B: process.env['B'] }
+        return ev
+      })
+      expect(envDuringRequest['A']).toBe('1')
+      expect(envDuringRequest['B']).toBe('2')
       svc.clear()
       expect(svc.list()).toEqual([])
       expect(svc.get('A')).toBeUndefined()
+      expect(process.env['A']).toBeUndefined()
+      expect(process.env['B']).toBeUndefined()
     })
   })
 
@@ -223,16 +233,10 @@ describe('dsh-secrets', () => {
       expect(services['secrets']).toBeDefined()
     })
 
-    it('registers secretsManager effect', () => {
+    it('registers secrets effect', () => {
       const { ctx, services } = mockCtx()
       apply(ctx)
-      expect(services['secretsManager']).toBeDefined()
-    })
-
-    it('both effects return same service instance', () => {
-      const { ctx, services } = mockCtx()
-      apply(ctx)
-      expect(services['secrets']).toBe(services['secretsManager'])
+      expect(services['secrets']).toBeDefined()
     })
   })
 

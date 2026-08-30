@@ -38,6 +38,8 @@ export class InMemoryProvider implements SecretsProvider {
 }
 
 export class SecretsService {
+  private injectedKeys = new Set<string>()
+
   constructor(private providers: SecretsProvider[] = [new InMemoryProvider()]) {}
 
   get(key: string): string | undefined {
@@ -45,7 +47,7 @@ export class SecretsService {
       const value = provider.get(key)
       if (value !== undefined) return value
     }
-    return undefined
+    return this.injectedKeys.has(key) ? process.env[key] : undefined
   }
 
   set(key: string, value: string): void {
@@ -61,10 +63,18 @@ export class SecretsService {
   }
 
   clear(): void {
+    for (const k of this.injectedKeys) {
+      delete process.env[k]
+    }
+    this.injectedKeys.clear()
     const p = this.providers[0]
     if (p && 'clear' in p && typeof p.clear === 'function') {
       p.clear()
     }
+  }
+
+  _inject(keys: string[]): void {
+    for (const k of keys) this.injectedKeys.add(k)
   }
 }
 
@@ -72,10 +82,10 @@ export class SecretsService {
 export function apply(ctx: any): void {
   const svc = new SecretsService()
   ctx.effect('secrets', () => svc)
-  ctx.effect('secretsManager', () => svc)
 
   ctx.on('gateway/request', async (ev: any, next: any) => {
     const keys = svc.list()
+    svc._inject(keys)
     const snap: Record<string, string | undefined> = {}
     for (const k of keys) {
       snap[k] = process.env[k]
