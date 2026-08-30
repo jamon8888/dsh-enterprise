@@ -88,10 +88,6 @@ export function apply(ctx: any, opts?: { pg?: PgClient }): void {
     // only record if we have tokens >0; still allow explicit 0 to be recorded via direct record()
     if (tokens !== 0 && (typeof tokens === 'number' ? tokens > 0 : (tokens as TokenUsage).totalTokens !== 0)) {
       await tracker.record(orgId, model, tokens as any).catch(() => {})
-    } else if (typeof ev?.tokens === 'number' && ev.tokens > 0) {
-      /* v8 ignore next */
-      await tracker.record(orgId, model, ev.tokens).catch(() => {})
-    /* v8 ignore next */
     }
     return result
   })
