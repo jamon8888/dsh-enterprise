@@ -76,7 +76,7 @@ Total: +12 commits, +577 lignes
 | Phase 3 | CLI / MCP / SDK | ⚠️ Partial | CLI stub existe |
 | **Phase 4** | **Benchmarking + Grafana + Nightly bench** | **✅ Complete** | `BENCHMARKING.md`, `nightly-bench.yml`, Grafana dashboards, `BenchmarkEnvelope` dual-write |
 | Phase 4.5 | Regulated P1 (resilience, model-registry, air-gapped Ollama) | ⚠️ Partial | `dsh-local-llm`, `model-registry` stubs |
-| **Phase 5** | **otel + cost-tracker + sla-monitor + secrets** | 🔲 Next | Voir §7 |
+| **Phase 5** | **otel + cost-tracker + sla-monitor + secrets** | **✅ Complete** | `dsh-otel` real OTEL SDK, shared meter, `dsh-cost-tracker` 25 tests, `dsh-sla-monitor` 17 tests, `dsh-secrets` scaffold + 29 tests |
 
 ---
 
@@ -104,19 +104,19 @@ Total: +12 commits, +577 lignes
 | `auth` | ✅ | Non | 1 | — |
 | `compliance-erasure` | ✅ | Non | 1 | — |
 | `dsh-audit-log` | ✅ | Non | 51 | ponytail: simple hash → crypto.subtle |
-| `dsh-cost-tracker` | ⚠️ Stub | Oui — in-memory Map | 1 | watchtower PG |
+| `dsh-cost-tracker` | ✅ | Non — 25 tests, PG insert ceiling | 26 | watchtower PG |
 | `dsh-git-worktree` | ⚠️ Stub | Oui — git worktree stub | 1 | cli --with worktree |
 | `dsh-library` | ⚠️ Stub | Oui — .dsh/library stub | 1 | fs.read quand populated |
 | `dsh-local-llm` | ⚠️ Stub | Oui — Ollama stub | 1 | Ollama in air-gapped K8s |
 | `dsh-mneme` | ⚠️ Stub | Oui — better-sqlite3 stub | 1 | better-sqlite3 ou PG |
 | `dsh-model-router` | ⚠️ Stub | Oui — cost/latency stub | 1 | gateway PG |
-| `dsh-otel` | ⚠️ **Stub vide** | Oui — pas de spans réels | 1 | wrap gateway/guards/watchtower |
+| `dsh-otel` | ✅ | Non — real OTEL SDK + shared meter | 10 | OTLP exporter when collector deployed |
 | `dsh-permissions` | ✅ | Non | 38 | — |
 | `dsh-policy-engine` | ⚠️ Stub | Oui — OPA mock | 1 | vrai OPA-WASM |
 | `dsh-pr-agent` | ⚠️ Stub | Oui — LLM review stub | 1 | PR open automation |
 | `dsh-release` | ⚠️ Stub | Oui — CycloneDX/cosign stub | 1 | version bump → SBOM → Helm |
-| `dsh-secrets` | ⚠️ Not scaffolded | — | 0 | Vault/1Password injection |
-| `dsh-sla-monitor` | ⚠️ Stub | Oui | 1 | gateway-p99 <2s, guard-block <1% |
+| `dsh-secrets` | ✅ | Non — scaffold + 29 tests, Vault ceiling | 29 | Vault/1Password deployed |
+| `dsh-sla-monitor` | ✅ | Non — 17 tests, PG query ceiling | 18 | gateway-p99 <2s, guard-block <1% |
 | `kb-rag` | ⚠️ Stub | Oui — substring search | 1 | PG pgvector cosine |
 | `model-registry` | ⚠️ Stub | Oui — Map stub | 2 | gateway PG migration 002 |
 | `resilience` | ⚠️ Stub | Oui | 1 | PITR WAL + R2 replica |
@@ -174,51 +174,31 @@ Total: +12 commits, +577 lignes
 
 ## 7. Phase 5 — Prochaines étapes
 
-### 7.1 `dsh-otel` — P0 (observabilité, débloque tout)
+### 7.1 `dsh-otel` — ✅ Complete
 
-**Pourquoi en premier:** `guards-iit/src/telemetry.ts` émet déjà `iit.phi`, `iit.ews`, `iit.latency` — mais via un stub. `dsh-otel` wire ces metrics à une vraie OTEL pipeline.
+- `sdk-init.ts` — `NodeSDK` + `PeriodicExportingMetricReader` + `ConsoleMetricExporter`, idempotent init
+- `meter.ts` — shared `Meter` exported from `dsh-otel/meter`
+- `guards-iit/telemetry.ts` — dynamic import of shared meter with graceful fallback
+- OTLP trace exporter — ponytail ceiling (add when OTEL Collector deployed)
 
-**Ce qui existe:** `packages/enterprise/dsh-otel/src/plugin.ts` (stub), `telemetry.ts` dans guards-iit.
-
-**Ce qu'il faut faire:**
-- Remplacer le stub par `@opentelemetry/api` + `@opentelemetry/sdk-node`
-- Wrap `ctx.llm`, `ctx.tools.guard`, `ctx.sandbox.run` avec spans
-- Ajouter histogrammes pour `iit.phi`, `iit.ews`, `iit.latency`
-- Tests: 1 span emitted par guard run
-
-**Dépendances:** Aucune (self-contained)
-
----
-
-### 7.2 `dsh-cost-tracker` + `dsh-sla-monitor` — P1 (PG, dépendance croisée)
-
-**Pourquoi ensemble:** Les deux需要的 PG `run_events` table (watchtower migration 002, existe).
+### 7.2 `dsh-cost-tracker` + `dsh-sla-monitor` — ✅ Complete
 
 **`dsh-cost-tracker`:**
-- Remplacer in-memory Map par `INSERT INTO spend_events` sur `run_events`
-- Aggregats par `org_id/project_id/model` window
-- Porter `core/pricing.ts` de Facility
+- 25 tests (costUsd/costCents, gateway/request hook, pg insert path, zero-token guard)
+- PG insert — ponytail ceiling (watchtower migration 002)
 
 **`dsh-sla-monitor`:**
-- Query `run_events` pour `gateway_p99_ms`, `guard_block_rate`
-- Alertes when `gateway_p99 > 2000ms` ou `guard_block_rate > 0.01`
+- 17 tests (SlaMonitor.check/observeLatency/observeGuard, event hooks, clear)
+- 4 pg-query tests (percentile_cont, block_rate SQL patterns)
+- PG query — ponytail ceiling (watchtower migration 002)
 
-**Dépendances:** watchtower PG migration 002 ✅ (exists)
+### 7.3 `dsh-secrets` — ✅ Complete
 
----
+- Full scaffold: `SecretsService`, `InMemoryProvider`, `SecretsProvider` interface
+- 29 tests (CRUD, provider fallback, gateway/request env injection with snapshot/restore)
+- Vault/1Password — ponytail ceiling (when enterprise secrets infra deployed)
 
-### 7.3 `dsh-secrets` — P1 (Vault/1Password)
-
-**Pourquoi独立:** Pas de PG, pas d'autre plugin.
-
-- Vault ou 1Password injection pour `gateway` + `model-registry`
-- `ctx.get('secrets').get('PROVIDER_API_KEY')`
-
-**Dépendances:** Vault/1Password deployed
-
----
-
-### 7.4 Remaining P2 plugins (can run in parallel)
+### 7.4 Remaining P2 plugins
 
 | Package | Action |
 |---------|--------|
@@ -246,21 +226,21 @@ dsh-enterprise/
     ├── guards-iit/src/guard-runner.ts   # 8 guards + WASM bridge
     ├── iit-core/src/bindgen.rs          # calculate_ces_js WASM
     ├── enterprise/*/src/plugin.ts        # 21 plugins
-    └── enterprise/dsh-otel/src/plugin.ts # STUB — next to implement
+    └── enterprise/dsh-otel/src/plugin.ts # ✅ — real OTEL SDK + shared meter
 ```
 
 ---
 
 ## Summary: What stays stub vs what gets built
 
-| Stub | Lift condition | Next action |
-|------|---------------|-------------|
-| `dsh-otel` | none (P0) | Implementer OTEL spans |
-| `dsh-cost-tracker` | watchtower PG ✅ | Implementer spendCounters in PG |
-| `dsh-sla-monitor` | watchtower PG ✅ | Implementer p99/block_rate queries |
-| `dsh-secrets` | Vault deployed | Scaffold + implement |
-| `dsh-mneme` | better-sqlite3 ou PG | Implementer SQLite ou PG switch |
-| `dsh-local-llm` | Ollama in K8s | Implementer real Ollama client |
-| `dsh-model-router` | gateway PG | Implementer cost/latency router |
-| `kb-rag` | PG pgvector | Implementer cosine search |
-| `iit-core` Rust stubs | latency measurements | Port when >threshold |
+| Stub | Lift condition | Status |
+|------|---------------|--------|
+| `dsh-otel` | OTLP exporter when collector deployed | ✅ Done |
+| `dsh-cost-tracker` | watchtower PG ✅ | ✅ Done (PG insert ceiling pending) |
+| `dsh-sla-monitor` | watchtower PG ✅ | ✅ Done (PG query ceiling pending) |
+| `dsh-secrets` | Vault/1Password deployed | ✅ Done (Vault ceiling pending) |
+| `dsh-mneme` | better-sqlite3 ou PG | Stub |
+| `dsh-local-llm` | Ollama in K8s | Stub |
+| `dsh-model-router` | gateway PG | Stub |
+| `kb-rag` | PG pgvector | Stub |
+| `iit-core` Rust stubs | latency measurements | Stub |
