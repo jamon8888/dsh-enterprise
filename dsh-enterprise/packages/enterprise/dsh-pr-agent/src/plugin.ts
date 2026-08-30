@@ -45,7 +45,7 @@ export class PrAgentService {
     }
     if (token) headers['Authorization'] = `Bearer ${token}`
 
-    const prRes = await globalThis.fetch(
+    const prRes = await (globalThis as { fetch: typeof fetch }).fetch(
       `${GITHUB_API}/repos/${req.owner}/${req.repo}/pulls/${req.prNumber}`,
       { headers },
     )
@@ -60,7 +60,7 @@ export class PrAgentService {
     const prData = (await prRes.json()) as { labels?: { name: string }[] }
     const labels: string[] = prData.labels?.map((l) => l.name) ?? []
 
-    const filesRes = await globalThis.fetch(
+    const filesRes = await (globalThis as { fetch: typeof fetch }).fetch(
       `${GITHUB_API}/repos/${req.owner}/${req.repo}/pulls/${req.prNumber}/files`,
       { headers },
     )
