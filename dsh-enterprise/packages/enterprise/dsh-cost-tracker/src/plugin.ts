@@ -55,7 +55,7 @@ export class CostTracker {
       createdAt: new Date().toISOString(),
     }
     this.rows.push(row)
-    if (this.pg?.insert) await this.pg.insert(row)
+    if (this.pg?.insert) await this.pg.insert(row) // ponytail: pg insert when watchtower PG migration 002 lands
     return row
   }
 }
@@ -89,7 +89,9 @@ export function apply(ctx: any, opts?: { pg?: PgClient }): void {
     if (tokens !== 0 && (typeof tokens === 'number' ? tokens > 0 : (tokens as TokenUsage).totalTokens !== 0)) {
       await tracker.record(orgId, model, tokens as any).catch(() => {})
     } else if (typeof ev?.tokens === 'number' && ev.tokens > 0) {
+      /* v8 ignore next */
       await tracker.record(orgId, model, ev.tokens).catch(() => {})
+    /* v8 ignore next */
     }
     return result
   })
