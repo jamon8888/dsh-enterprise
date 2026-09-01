@@ -11,9 +11,26 @@ import { generateReceipt } from './receipts.js'
 export type GithubPR = { merged: boolean; closed: boolean; number?: number }
 export type GithubChecks = { green: boolean }
 
+export type GithubCheckStatus = 'queued' | 'in_progress' | 'completed' | 'waiting' | 'pending'
+export type GithubCheckConclusion = 'action_required' | 'cancelled' | 'failure' | 'neutral' | 'success' | 'skipped' | 'stale' | 'timed_out'
+
+export type PostCheckRunParams = {
+  status: GithubCheckStatus
+  conclusion?: GithubCheckConclusion
+  headSha: string
+  name: string
+  detailsUrl?: string
+  output?: {
+    title: string
+    summary: string
+  }
+  actions?: Array<{ label: string; description: string; identifier: string }>
+}
+
 export type GithubClient = {
   getPR(prNumber: number): Promise<GithubPR>
   getChecks(commitSha: string): Promise<GithubChecks>
+  postCheckRun?(params: PostCheckRunParams): Promise<{ id: number; url: string }>
 }
 
 export type DbClient = {
@@ -100,6 +117,34 @@ export async function runWatchtowerJob(
     const receipt = generateReceipt(run, outcome, runPrevHash, phiSnapshot)
     await db.insertReceipt(receipt)
     receipts.push(receipt)
+
+    // Post GitHub check run for needs-human outcome
+    if (outcome === 'needs-human' && github.postCheckRun && run.commitSha) {
+      try {
+        await github.postCheckRun({
+          status: 'completed',
+          conclusion: 'action_required',
+          headSha: run.commitSha,
+          name: 'dsh-enterprise/needs-human',
+          detailsUrl: `https://github.com/example/repo/runs/${receipt.hash}`,
+          output: {
+            title: 'IIT Guard: needs human review',
+            summary: `Session ${run.sessionId} requires human review before merge. Guard dispositions: ${JSON.stringify(receipt.guardDispositions)}`,
+          },
+          actions: [
+            {
+              label: 'Approve and merge',
+              description: 'TenantAdmin approves this run for merge',
+              identifier: 'approve-merge',
+            },
+          ],
+        })
+      } catch (err) {
+        // GitHub check posting is non-blocking — log and continue
+        void err
+      }
+    }
+
     prevHash = receipt.hash
 
     // stub aggregate compute (not persisted — placeholder for Postgres run_events aggregate)
@@ -107,6 +152,35 @@ export async function runWatchtowerJob(
   }
 
   return receipts
+}
+
+/**
+ * Approve a needs-human receipt (TenantAdmin action).
+ * Re-posts the GitHub check as 'success' and returns an updated accepted receipt.
+ */
+export async function approveNeedsHuman(
+  receipt: Receipt,
+  github: GithubClient,
+  _actor: { guardRole: string },
+): Promise<Receipt> {
+  if (receipt.outcome !== 'needs-human') {
+    throw new Error(`approveNeedsHuman: receipt ${receipt.hash} is not needs-human (got ${receipt.outcome})`)
+  }
+  if (!github.postCheckRun) {
+    throw new Error('approveNeedsHuman: github.postCheckRun not available')
+  }
+  const commitSha = (receipt as unknown as { commitSha?: string }).commitSha ?? ''
+  await github.postCheckRun({
+    status: 'completed',
+    conclusion: 'success',
+    headSha: commitSha,
+    name: 'dsh-enterprise/needs-human',
+    output: {
+      title: 'Approved by TenantAdmin',
+      summary: `Session ${receipt.sessionId} approved. Original receipt: ${receipt.hash}`,
+    },
+  })
+  return { ...receipt, outcome: 'accepted' }
 }
 
 export { computeAggregates }

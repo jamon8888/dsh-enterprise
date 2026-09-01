@@ -17,7 +17,7 @@ export const mipShiftGuard = {
   Config: z.object({
     window: z.number().default(10),
     maxShift: z.number().default(2.0),
-    severity: z.enum(['error', 'warn']).default('warn'),
+    severity: z.enum(['error', 'warn']).default('error'),
   }),
   async run(
     ctx: Context,

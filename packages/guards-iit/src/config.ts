@@ -9,13 +9,27 @@ export const Config = z.object({
   minPhi: z.number().default(0.1),
   max_exact_size: z.number().default(15),
   tpmVars: z.array(z.string()).default(['tool_success', 'approval_granted', 'skill_loaded', 'sandbox_ok']),
+
+  // P0 guard configs — per-guard threshold overrides
+  causalEmergence: z.object({
+    minEffectiveness: z.number().default(0.1),
+    maxDegeneracy: z.number().default(0.9),
+  }).default({ minEffectiveness: 0.1, maxDegeneracy: 0.9 }),
+  phiTrajectory: z.object({
+    window: z.number().default(10),
+    maxDrop: z.number().default(0.15),
+    maxSlope: z.number().default(-0.02),
+  }).default({ window: 10, maxDrop: 0.15, maxSlope: -0.02 }),
+  mipShift: z.object({
+    window: z.number().default(10),
+    maxShift: z.number().default(2.0),
+  }).default({ window: 10, maxShift: 2.0 }),
+  boundaryFrontier: z.object({
+    minBoundaryPhi: z.number().default(0.1),
+  }).default({ minBoundaryPhi: 0.1 }),
 })
 
-export type Config = {
-  minPhi: number
-  max_exact_size: number
-  tpmVars: string[]
-}
+export type Config = z.infer<typeof Config>
 
 /**
  * YAML schema written to `.dsh/iit-config.yaml` on `dsh-enterprise init`.
@@ -33,4 +47,4 @@ export function renderIitConfigYaml(cfg: Config): string {
 }
 
 /** Default config (parsed with defaults applied). */
-export const DEFAULT_CONFIG: Config = Config({} as Config) as Config
+export const DEFAULT_CONFIG: Config = Config.parse({})

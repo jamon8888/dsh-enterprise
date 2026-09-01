@@ -16,7 +16,7 @@ export const phiTrajectoryGuard = {
     window: z.number().default(10),
     maxDrop: z.number().default(0.15),
     maxSlope: z.number().default(-0.02),
-    severity: z.enum(['error', 'warn']).default('warn'),
+    severity: z.enum(['error', 'warn']).default('error'),
   }),
   async run(
     ctx: Context,

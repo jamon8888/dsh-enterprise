@@ -9,6 +9,17 @@ import { emitGuardDecision } from './session-events.js'
 import { CesCache } from './cache.js'
 import { recordPhi, recordLatency, recordEws } from './telemetry.js'
 
+function getGuardConfig(guardId: string, cfg: Config): Record<string, unknown> {
+  switch (guardId) {
+    case 'causal-emergence': return { ...cfg.causalEmergence }
+    case 'phi-threshold': return { minPhi: cfg.minPhi }
+    case 'phi-trajectory': return { ...cfg.phiTrajectory }
+    case 'mip-shift': return { ...cfg.mipShift }
+    case 'boundary-frontier': return { ...cfg.boundaryFrontier }
+    default: return {}
+  }
+}
+
 const cesCache = new CesCache()
 import { cesFingerprintGuard } from './guards/ces-fingerprint.js'
 import { boundaryFrontierGuard } from './guards/boundary-frontier.js'
@@ -23,30 +34,36 @@ import { causalEmergenceGuard } from './guards/causal-emergence.js'
 import { mipShiftGuard } from './guards/mip-shift.js'
 
 export const GUARDS = [
+  // P0 — fail-closed, evaluated first
+  causalEmergenceGuard,
   phiThresholdGuard,
   phiTrajectoryGuard,
-  workspaceIgnitionGuard,
-  cesFingerprintGuard,
+  mipShiftGuard,
   boundaryFrontierGuard,
+  // P1/P2 — evaluated after P0 stack
+  cesFingerprintGuard,
   attractorEwsGuard,
   catastropheCuspGuard,
+  workspaceIgnitionGuard,
   effectEthosGuard,
   freeEnergyGuard,
-  causalEmergenceGuard,
-  mipShiftGuard,
 ] as const
 
 /** Guards that require a TPM + state to evaluate; skipped for action-only events. */
 const TPM_DEPENDENT = new Set([
+  // P0
+  'causal-emergence',
   'phi-threshold',
   'phi-trajectory',
-  'ces-fingerprint',
   'boundary-frontier',
+  'mip-shift',
+  // P1/P2
+  'ces-fingerprint',
   'attractor-ews',
   'catastrophe-cusp',
-  'mip-shift',
+  'workspace-ignition',
   'free-energy',
-  'causal-emergence',
+  'effect-ethos',
 ])
 
 export const name = 'dsh-enterprise:guards-iit'
@@ -135,7 +152,8 @@ export function apply(ctx: Context, cfg: Config): void {
     for (const guard of GUARDS) {
       if (!hasTpm && TPM_DEPENDENT.has(guard.id)) continue
       const t0 = performance.now()
-      const result = (await guard.run(ctx, cfg as any, e as any)) as import('./types.js').GuardResult
+      const guardCfg = getGuardConfig(guard.id, cfg)
+      const result = (await guard.run(ctx, guardCfg, e as any)) as import('./types.js').GuardResult
       const ms = performance.now() - t0
       recordLatency(ms, guard.id)
       guardDecisions.push({ guardId: guard.id, disposition: result.disposition, phi: result.phi, reason: result.reason })
@@ -150,6 +168,8 @@ export function apply(ctx: Context, cfg: Config): void {
             finalDisposition: 'block',
             blockedBy: guard.id,
             timestamp: Date.now(),
+            phi: result.phi,
+            cesHash: result.cesHash,
             ignorable: true,
           })
         } catch {}
@@ -171,6 +191,8 @@ export function apply(ctx: Context, cfg: Config): void {
         guards: guardDecisions,
         finalDisposition: 'pass',
         timestamp: Date.now(),
+        phi: (e as { phi?: number }).phi,
+        cesHash: (e as { cesHash?: string }).cesHash,
         ignorable: true,
       })
     } catch {}
