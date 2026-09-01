@@ -15,7 +15,7 @@ export const causalEmergenceGuard = {
   Config: z.object({
     minEffectiveness: z.number().default(0.1),
     maxDegeneracy: z.number().default(0.9),
-    severity: z.enum(['error', 'warn']).default('warn'),
+    severity: z.enum(['error', 'warn']).default('error'),
   }),
   async run(
     ctx: Context,

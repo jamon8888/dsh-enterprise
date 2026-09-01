@@ -1,6 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
-import { apply, GuardError } from '../src/guard-runner.ts'
+import { apply, GuardError, GUARDS } from '../src/guard-runner.ts'
 import { phiThresholdGuard } from '../src/guards/phi-threshold.ts'
+import { causalEmergenceGuard } from '../src/guards/causal-emergence.ts'
+import { phiTrajectoryGuard } from '../src/guards/phi-trajectory.ts'
+import { mipShiftGuard } from '../src/guards/mip-shift.ts'
 
 function mockCtx(overrides: Record<string, unknown> = {}) {
   const handlers: Record<string, unknown> = {}
@@ -97,5 +100,74 @@ describe('guard-runner', () => {
     const res = await phiThresholdGuard.run(ctx as never, { minPhi: 0.1 }, { tpm: {}, state: 0 })
     expect(res.disposition).toBe('pass')
     expect(res.phi).toBe(0.2)
+  })
+
+  it('GUARDS array orders P0 guards first: causal-emergence, phi-threshold, phi-trajectory, mip-shift, boundary-frontier', () => {
+    const ids = GUARDS.map((g) => g.id)
+    const p0 = ['causal-emergence', 'phi-threshold', 'phi-trajectory', 'mip-shift', 'boundary-frontier']
+    p0.forEach((id, i) => {
+      expect(ids[i]).toBe(id)
+    })
+    expect(ids.slice(0, 5)).toEqual(p0)
+  })
+
+  it('causalEmergenceGuard blocks when severity=error and effectiveness < minEffectiveness', async () => {
+    const stochasticTpm = [
+      [0.5, 0.5],
+      [0.5, 0.5],
+    ]
+    const res = await causalEmergenceGuard.run(
+      {} as never,
+      { minEffectiveness: 0.5, maxDegeneracy: 0.9, severity: 'error' },
+      { tpm: stochasticTpm },
+    )
+    expect(res.disposition).toBe('block')
+    expect(res.phi).toBeLessThan(0.5)
+  })
+
+  it('causalEmergenceGuard warns when severity=warn and effectiveness < minEffectiveness', async () => {
+    const stochasticTpm = [
+      [0.5, 0.5],
+      [0.5, 0.5],
+    ]
+    const res = await causalEmergenceGuard.run(
+      {} as never,
+      { minEffectiveness: 0.5, maxDegeneracy: 0.9, severity: 'warn' },
+      { tpm: stochasticTpm },
+    )
+    expect(res.disposition).toBe('warn')
+  })
+
+  it('phiTrajectoryGuard blocks when severity=error and trajectory alert is critical', async () => {
+    const mockCtx = (trajectoryResult: unknown) => ({
+      get: () => ({
+        phi_trajectory_wasm: async () => trajectoryResult,
+        calculatePhi: async () => ({ phi: 0.3 }),
+      }),
+    })
+    const res = await phiTrajectoryGuard.run(
+      mockCtx({ phi_current: 0.2, phi_mean: 0.5, drift: 0.3, slope: -0.1, variance: 0.05, alert: 'critical' }) as never,
+      { window: 10, maxDrop: 0.15, maxSlope: -0.02, severity: 'error' },
+      { sessionId: 'test-session', phi: 0.2 },
+    )
+    expect(res.disposition).toBe('block')
+  })
+
+  it('mipShiftGuard blocks when severity=error and deviation > maxShift', async () => {
+    const res = await mipShiftGuard.run(
+      {} as never,
+      { window: 10, maxShift: 1.0, severity: 'error' },
+      { sessionId: 'test-mip', mip: 10.0 },
+    )
+    expect(res.disposition).toBe('block')
+  })
+
+  it('mipShiftGuard passes when deviation within maxShift', async () => {
+    const res = await mipShiftGuard.run(
+      {} as never,
+      { window: 10, maxShift: 2.0, severity: 'error' },
+      { sessionId: 'test-mip-ok', mip: 0.5 },
+    )
+    expect(res.disposition).toBe('pass')
   })
 })

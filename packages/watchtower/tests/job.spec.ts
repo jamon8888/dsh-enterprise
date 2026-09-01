@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { runWatchtowerJob } from '../src/job.js'
+import { runWatchtowerJob, approveNeedsHuman } from '../src/job.js'
 import type { DbClient, GithubClient } from '../src/job.js'
 import type { Run, RunId, SessionId, Receipt } from '../src/types.js'
 
@@ -112,5 +112,75 @@ describe('runWatchtowerJob outcome joining', () => {
     const receipts = await runWatchtowerJob({}, db, github)
     expect(receipts[0]!.outcome).toBe('accepted')
     expect(receipts[1]!.outcome).toBe('rejected')
+  })
+})
+
+describe('needs-human GitHub check run', () => {
+  it('posts action_required check run when outcome is needs-human', async () => {
+    const run = makeRun({ runId: 'run-nh' as RunId, prNumber: 5, commitSha: 'sha5' })
+    const db = memoryDb([run])
+    const checkRuns: Parameters<NonNullable<GithubClient['postCheckRun']>>[0][] = []
+    const github: GithubClient = {
+      getPR: async () => ({ merged: false, closed: false }),
+      getChecks: async () => ({ green: false }),
+      postCheckRun: async (params) => {
+        checkRuns.push(params)
+        return { id: 123, url: 'https://github.com/run/123' }
+      },
+    }
+    const receipts = await runWatchtowerJob({}, db, github)
+    expect(receipts[0]!.outcome).toBe('needs-human')
+    expect(checkRuns).toHaveLength(1)
+    expect(checkRuns[0]!.conclusion).toBe('action_required')
+    expect(checkRuns[0]!.name).toBe('dsh-enterprise/needs-human')
+    expect(checkRuns[0]!.headSha).toBe('sha5')
+    expect(checkRuns[0]!.actions).toContainEqual(
+      expect.objectContaining({ identifier: 'approve-merge' }),
+    )
+  })
+
+  it('does not post check run when github.postCheckRun is absent (no-op)', async () => {
+    const run = makeRun({ runId: 'run-nh-no-gh' as RunId, prNumber: 6, commitSha: 'sha6' })
+    const db = memoryDb([run])
+    const github: GithubClient = {
+      getPR: async () => ({ merged: false, closed: false }),
+      getChecks: async () => ({ green: false }),
+      // no postCheckRun
+    }
+    // Should not throw — just no-ops
+    const receipts = await runWatchtowerJob({}, db, github)
+    expect(receipts[0]!.outcome).toBe('needs-human')
+  })
+
+  it('approved needs-human receipt returns accepted outcome', async () => {
+    const receipt = {
+      hash: 'abc123',
+      sessionId: 'sess-1' as SessionId,
+      outcome: 'needs-human' as const,
+      guardDispositions: [],
+    } as unknown as Receipt & { commitSha: string }
+    const approvedReceipt = await approveNeedsHuman(
+      receipt,
+      {
+        postCheckRun: async () => ({ id: 1, url: 'https://github.com/run/1' }),
+      },
+      { guardRole: 'tenantadmin' },
+    )
+    expect(approvedReceipt.outcome).toBe('accepted')
+  })
+
+  it('approveNeedsHuman throws when receipt is not needs-human', async () => {
+    const receipt = {
+      hash: 'def456',
+      sessionId: 'sess-2' as SessionId,
+      outcome: 'accepted' as const,
+    } as unknown as Receipt
+    await expect(
+      approveNeedsHuman(
+        receipt,
+        { postCheckRun: async () => ({ id: 1, url: '' }) },
+        { guardRole: 'tenantadmin' },
+      ),
+    ).rejects.toThrow('not needs-human')
   })
 })

@@ -16,6 +16,36 @@ import type {
   LoadStoredResult,
 } from './types.js'
 
+interface Receipt {
+  runId: string
+  sessionId: string
+  agentId: string
+  prevHash: string
+  logHash: string
+  phiSnapshot: { phi: number; method: string; cesHash: string }
+  outcome: 'accepted' | 'rejected' | 'needs-human'
+  cost: { tokens: Record<string, number>; usd: number; budgets: unknown[] }
+  guardDispositions: { guardId: string; disposition: string }[]
+  builtAt: number
+  builder: { gitSha: string; crateVersions: Record<string, string> }
+  hash: string
+}
+
+interface ReceiptRow {
+  id: string
+  run_id: string
+  session_id: string
+  hash: string
+  prev_hash: string
+  log_hash: string
+  outcome: string
+  cost: unknown
+  guard_dispositions: unknown
+  built_at: number
+  builder: unknown
+  phi_snapshot: unknown
+}
+
 const { Pool: PgPool } = pg
 
 export class PostgresPersistenceBackend extends Service {
@@ -96,6 +126,8 @@ export class PostgresPersistenceBackend extends Service {
       // Run pending migrations
       const migrations = [
         { version: 1, name: 'initial', sql: this.getInitialMigrationSQL() },
+        { version: 2, name: 'enterprise_receipts', sql: await this.getFileMigrationSQL(2) },
+        { version: 3, name: 'receipt_chain_integrity', sql: await this.getFileMigrationSQL(3) },
       ]
 
       for (const migration of migrations) {
@@ -174,6 +206,19 @@ export class PostgresPersistenceBackend extends Service {
         FOR EACH ROW
         EXECUTE FUNCTION ${this.config.schema}.notify_session_event();
     `
+  }
+
+  /** Load a numbered migration SQL file from disk. */
+  private async getFileMigrationSQL(version: number): Promise<string> {
+    const { readFileSync } = await import('fs')
+    const names: Record<number, string> = {
+      2: '002_enterprise_receipts.sql',
+      3: '003_receipt_chain_integrity.sql',
+    }
+    const filename = names[version]
+    if (!filename) throw new Error(`No migration file for version ${version}`)
+    const path = new URL(`../migrations/${filename}`, import.meta.url)
+    return readFileSync(path, 'utf-8')
   }
 
   /** Get applied migrations */
@@ -502,6 +547,115 @@ export class PostgresPersistenceBackend extends Service {
   /** Get the underlying pool for advanced operations */
   getPool(): MigrationPool {
     return this.pool
+  }
+
+  private receiptRowToReceipt(row: ReceiptRow): Receipt {
+    return {
+      runId: row.run_id as Receipt['runId'],
+      sessionId: row.session_id as Receipt['sessionId'],
+      agentId: row.agent_id,
+      prevHash: row.prev_hash,
+      logHash: row.log_hash,
+      phiSnapshot: row.phi_snapshot ?? { phi: 0, method: 'unknown', cesHash: 'none' },
+      outcome: row.outcome as Receipt['outcome'],
+      cost: row.cost ?? { tokens: {}, usd: 0, budgets: [] },
+      guardDispositions: row.guard_dispositions ?? [],
+      builtAt: row.built_at,
+      builder: row.builder ?? { gitSha: 'unknown', crateVersions: {} },
+      hash: row.hash,
+    }
+  }
+
+  /** Insert a receipt into the hash chain. Throws on chain integrity violation. */
+  async insertReceipt(receipt: Receipt): Promise<void> {
+    const client = await this.pool.connect()
+    try {
+      await client.query('BEGIN')
+      await client.query(
+        `INSERT INTO ${this.config.schema}.receipts
+          (id, run_id, session_id, hash, prev_hash, log_hash, outcome, cost, guard_dispositions, built_at, builder)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        [
+          receipt.hash,
+          receipt.runId,
+          receipt.sessionId,
+          receipt.hash,
+          receipt.prevHash,
+          receipt.logHash,
+          receipt.outcome,
+          JSON.stringify(receipt.cost),
+          JSON.stringify(receipt.guardDispositions),
+          receipt.builtAt,
+          JSON.stringify(receipt.builder),
+        ],
+      )
+      await client.query('COMMIT')
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
+  }
+
+  /** List all receipts ordered by builtAt (chain order). */
+  async listReceipts(): Promise<Receipt[]> {
+    const client = await this.pool.connect()
+    try {
+      const result = await client.query<ReceiptRow>(
+        `SELECT * FROM ${this.config.schema}.receipts ORDER BY built_at ASC`,
+      )
+      return result.rows.map((r) => this.receiptRowToReceipt(r))
+    } finally {
+      client.release()
+    }
+  }
+
+  /** Get the genesis hash singleton. Creates row with 'genesis' if not exists. */
+  async getGenesisHash(): Promise<string> {
+    const client = await this.pool.connect()
+    try {
+      const result = await client.query<{ value: string }>(
+        `SELECT value FROM ${this.config.schema}.receipt_genesis WHERE id = 'singleton'`,
+      )
+      if (result.rows.length > 0) return result.rows[0]!.value
+      // initialize with 'genesis'
+      await client.query(
+        `INSERT INTO ${this.config.schema}.receipt_genesis (id, value) VALUES ('singleton', 'genesis')`,
+      )
+      return 'genesis'
+    } finally {
+      client.release()
+    }
+  }
+
+  /** Set the genesis hash singleton (idempotent update). */
+  async setGenesisHash(hash: string): Promise<void> {
+    const client = await this.pool.connect()
+    try {
+      await client.query(
+        `INSERT INTO ${this.config.schema}.receipt_genesis (id, value)
+           VALUES ('singleton', $1)
+           ON CONFLICT (id) DO UPDATE SET value = $1`,
+        [hash],
+      )
+    } finally {
+      client.release()
+    }
+  }
+
+  /** Get the last receipt hash (tip of the chain). Returns genesis if empty. */
+  async getLastReceiptHash(): Promise<string> {
+    const client = await this.pool.connect()
+    try {
+      const result = await client.query<{ hash: string }>(
+        `SELECT hash FROM ${this.config.schema}.receipts ORDER BY built_at DESC LIMIT 1`,
+      )
+      if (result.rows.length > 0) return result.rows[0]!.hash
+      return this.getGenesisHash()
+    } finally {
+      client.release()
+    }
   }
 
   /** Dispose of the backend */

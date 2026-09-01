@@ -1,0 +1,20 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-aar-bridge",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AAR Bridge — subscribes to iit-guard.decision events, runs Python AAR scoring, emits behavioral signals to watchtower",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis",
+    "@deepseek-ai/schemastery": "catalog:schemastery",
+    "@deepseek-ai/dsh-session": "catalog:dshSession"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "vitest": "^4.1.11"
+  }
+}
