@@ -55,12 +55,16 @@ export function eventLogPlugin(ctx: Context, opts: EventLogOptions = {}): void {
     if (eventType.startsWith('guard.') || eventType.startsWith('permission.')) {
       await jsonl.appendImmediate(envelope)
       if (sqlite) {
-        await sqlite.project(envelope).catch(() => { /* log and continue */ })
+        await sqlite.project(envelope).catch((err: unknown) => {
+          console.error('[event-log] sqlite project failed:', err)
+        })
       }
     } else {
       jsonl.append(envelope)
       if (sqlite) {
-        sqlite.project(envelope).catch(() => { /* log and continue */ })
+        sqlite.project(envelope).catch((err: unknown) => {
+          console.error('[event-log] sqlite project failed:', err)
+        })
       }
     }
 
@@ -77,7 +81,9 @@ export function eventLogPlugin(ctx: Context, opts: EventLogOptions = {}): void {
     jsonl.stopScheduledFlush()
     await jsonl.flush()
     if (sqlite) {
-      await sqlite.close().catch(() => { /* ignore */ })
+      await sqlite.close().catch((err: unknown) => {
+        console.error('[event-log] sqlite close failed:', err)
+      })
     }
   })
 }
