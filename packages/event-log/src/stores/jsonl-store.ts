@@ -79,4 +79,14 @@ export class JsonlStore {
       if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e
     }
   }
+
+  async *replay(): AsyncGenerator<EventEnvelope, void, unknown> {
+    for await (const line of this.readLines()) {
+      try {
+        yield JSON.parse(line) as EventEnvelope
+      } catch {
+        console.warn('[event-log] corrupt line skipped:', line.slice(0, 80))
+      }
+    }
+  }
 }
