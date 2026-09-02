@@ -16,6 +16,7 @@ function getGuardConfig(guardId: string, cfg: Config): Record<string, unknown> {
     case 'phi-trajectory': return { ...cfg.phiTrajectory }
     case 'mip-shift': return { ...cfg.mipShift }
     case 'boundary-frontier': return { ...cfg.boundaryFrontier }
+    case 'effect-ethos': return { effectEthos: cfg.effectEthos }
     default: return {}
   }
 }
@@ -63,7 +64,6 @@ const TPM_DEPENDENT = new Set([
   'catastrophe-cusp',
   'workspace-ignition',
   'free-energy',
-  'effect-ethos',
 ])
 
 export const name = 'dsh-enterprise:guards-iit'
@@ -153,7 +153,7 @@ export function apply(ctx: Context, cfg: Config): void {
       if (!hasTpm && TPM_DEPENDENT.has(guard.id)) continue
       const t0 = performance.now()
       const guardCfg = getGuardConfig(guard.id, cfg)
-      const result = (await guard.run(ctx, guardCfg, e as any)) as import('./types.js').GuardResult
+      const result = (await guard.run(ctx, guardCfg as any, e as any)) as import('./types.js').GuardResult
       const ms = performance.now() - t0
       recordLatency(ms, guard.id)
       guardDecisions.push({ guardId: guard.id, disposition: result.disposition, phi: result.phi, reason: result.reason })
