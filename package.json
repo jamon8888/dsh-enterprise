@@ -1,18 +1,6 @@
 {
-  "name": "@deepseek-ai/dsh-enterprise",
-  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@9.12.0+sha512.4abf725084d7bcbafbd728bfc7bee61f2f791f977fd87542b3579dcb23504d170d46337945e4c66485cd12d588a0c0e570ed9c477e7ccdd8507cf05f3f92eaca",
-  "engines": {
-    "node": ">=22"
-  },
-  "description": "IIT-Inspired Enterprise Plugins for DeepSeek Harness — 11 consciousness guards, observability, security, and release tooling",
-  "license": "MIT OR Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jamon8888/dsh-enterprise.git"
-  },
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
