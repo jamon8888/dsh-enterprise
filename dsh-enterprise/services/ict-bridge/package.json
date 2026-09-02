@@ -1,0 +1,7 @@
+{
+  "name": "@internal/ict-bridge",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "FastAPI sidecar bridging ict/*.py for DSH Enterprise guards-iit"
+}

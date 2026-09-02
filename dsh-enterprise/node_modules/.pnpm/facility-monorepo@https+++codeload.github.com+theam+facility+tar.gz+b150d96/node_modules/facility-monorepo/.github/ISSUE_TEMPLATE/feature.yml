@@ -1,0 +1,23 @@
+name: Feature or change proposal
+description: Propose a capability, or a change to how an existing one behaves.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to do and where Facility gets in the way. Describe the situation, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you propose
+      description: The behaviour you would expect. If it changes an existing contract, say what breaks.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you considered instead
+      description: Including doing nothing — knowing why the workaround is not enough helps size the change.

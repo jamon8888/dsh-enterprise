@@ -1,0 +1,2 @@
+version: '1'
+import: '@deepseek-ai/dsh-enterprise/enterprise.patch.yml'

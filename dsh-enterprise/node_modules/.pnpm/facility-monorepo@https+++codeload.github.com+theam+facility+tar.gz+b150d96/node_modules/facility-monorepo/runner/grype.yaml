@@ -1,0 +1,107 @@
+# Runner-only risk acceptances for version-pinned upstream Docker binaries.
+#
+# This file is never auto-discovered: the image workflow passes it explicitly
+# only for the runner scan and scans service images from RUNNER_TEMP. Every rule
+# binds the advisory, embedded module version, package type, and exact binary
+# path. A Docker-tool digest or embedded-version change therefore fails closed
+# and requires this evidence to be reviewed again.
+#
+# Reviewed 2026-08-07 with Grype 0.110.0 and govulncheck 1.6.0. runc and
+# RootlessKit have no reachable vulnerable symbols. The containerd findings are
+# limited to its rootless, local-UNIX-socket runtime behind Facility's Docker
+# proxy; it does not use Docker AuthZ plugins or xDS RBAC. Remove these rules as
+# soon as the pinned upstream image contains the fixed module versions.
+ignore:
+  # Docker AuthZ request-body bypass. Facility configures no AuthZ plugin, and
+  # these files are client plugins rather than the rootless dockerd daemon.
+  - vulnerability: GHSA-x744-4wpc-v9h2
+    package:
+      name: github.com/docker/docker
+      version: v28.5.2+incompatible
+      type: go-module
+      location: /usr/local/libexec/docker/cli-plugins/docker-buildx
+  - vulnerability: GHSA-x744-4wpc-v9h2
+    package:
+      name: github.com/docker/docker
+      version: v28.5.2+incompatible
+      type: go-module
+      location: /usr/local/libexec/docker/cli-plugins/docker-compose
+
+  # Go's symbol-aware binary scanner reports no reachable vulnerable symbols
+  # for the x/net copies embedded in runc and RootlessKit.
+  - vulnerability: GO-2026-4918
+    package:
+      name: golang.org/x/net
+      version: v0.43.0
+      type: go-module
+      location: /usr/local/bin/runc
+  - vulnerability: GO-2026-5026
+    package:
+      name: golang.org/x/net
+      version: v0.43.0
+      type: go-module
+      location: /usr/local/bin/runc
+  - vulnerability: GO-2026-5942
+    package:
+      name: golang.org/x/net
+      version: v0.43.0
+      type: go-module
+      location: /usr/local/bin/runc
+  - vulnerability: GO-2026-5942
+    package:
+      name: golang.org/x/net
+      version: v0.55.0
+      type: go-module
+      location: /usr/local/bin/rootlesskit
+
+  # containerd is rootless and its Unix socket is reachable only through the
+  # restricted Facility proxy. The gRPC advisory's xDS RBAC path is unused;
+  # malformed DNS/UTF-8 inputs can at most terminate this disposable sandbox.
+  - vulnerability: GO-2026-5942
+    package:
+      name: golang.org/x/net
+      version: v0.55.0
+      type: go-module
+      location: /usr/local/bin/containerd
+  - vulnerability: GO-2026-5942
+    package:
+      name: golang.org/x/net
+      version: v0.55.0
+      type: go-module
+      location: /usr/local/bin/containerd-shim-runc-v2
+  - vulnerability: GO-2026-5942
+    package:
+      name: golang.org/x/net
+      version: v0.55.0
+      type: go-module
+      location: /usr/local/bin/ctr
+  - vulnerability: GO-2026-5970
+    package:
+      name: golang.org/x/text
+      version: v0.38.0
+      type: go-module
+      location: /usr/local/bin/containerd
+  - vulnerability: GO-2026-5970
+    package:
+      name: golang.org/x/text
+      version: v0.38.0
+      type: go-module
+      location: /usr/local/bin/ctr
+  - vulnerability: GHSA-hrxh-6v49-42gf
+    package:
+      name: google.golang.org/grpc
+      version: v1.80.0
+      type: go-module
+      location: /usr/local/bin/containerd
+  - vulnerability: GHSA-hrxh-6v49-42gf
+    package:
+      name: google.golang.org/grpc
+      version: v1.80.0
+      type: go-module
+      location: /usr/local/bin/containerd-shim-runc-v2
+  - vulnerability: GHSA-hrxh-6v49-42gf
+    package:
+      name: google.golang.org/grpc
+      version: v1.80.0
+      type: go-module
+      location: /usr/local/bin/ctr

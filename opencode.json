@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "formatter": {
+    "ruff": {
+      "command": ["ruff", "format", "$FILE"],
+      "extensions": [".py", ".pyi"]
+    }
+  },
+  "lsp": true,
+  "plugin": [
+    "opencode-vibeguard",
+    "opencode-dynamic-context-pruning",
+    "opencode-worktree"
+  ],
+  "instructions": ["AGENTS.md", "dsh/AGENTS.md", "dsh/docs/testing.md"],
+  "permission": {
+    "bash": "ask"
+  }
+}

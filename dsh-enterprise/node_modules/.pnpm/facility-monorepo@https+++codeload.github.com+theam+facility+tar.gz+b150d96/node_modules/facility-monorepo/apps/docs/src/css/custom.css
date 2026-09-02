@@ -1,0 +1,103 @@
+/* Facility docs — TAM-50 skin over Infima. Same tokens as the platform. */
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
+:root,
+[data-theme="dark"] {
+  --bg: #000000;
+  --bg-subtle: #0d1117;
+  --card: #161b22;
+  --ink: #ffffff;
+  --mut: #999999;
+  --dim: #5c6570;
+  --line: rgba(255, 255, 255, 0.14);
+  --accent: #ffd923;
+
+  --ifm-background-color: var(--bg);
+  --ifm-background-surface-color: var(--bg-subtle);
+  --ifm-color-primary: var(--accent);
+  --ifm-color-primary-dark: #e6c320;
+  --ifm-color-primary-darker: #d9b81e;
+  --ifm-color-primary-darkest: #b39719;
+  --ifm-color-primary-light: #ffdd39;
+  --ifm-color-primary-lighter: #ffe04d;
+  --ifm-color-primary-lightest: #ffe873;
+  --ifm-color-content: var(--ink);
+  --ifm-color-content-secondary: var(--mut);
+  --ifm-font-family-base: "IBM Plex Sans", -apple-system, sans-serif;
+  --ifm-font-family-monospace: "IBM Plex Mono", ui-monospace, monospace;
+  --ifm-code-font-size: 87%;
+  --ifm-heading-font-weight: 600;
+  --ifm-global-radius: 0;
+  --ifm-toc-border-color: var(--line);
+  --ifm-table-border-color: var(--line);
+  --ifm-blockquote-border-left-width: 2px;
+  --ifm-navbar-background-color: rgba(0, 0, 0, 0.9);
+  --ifm-navbar-shadow: inset 0 -1px 0 var(--line);
+  --ifm-footer-background-color: var(--bg);
+  --docusaurus-highlighted-code-line-bg: rgba(255, 217, 35, 0.08);
+}
+
+html {
+  color-scheme: dark;
+}
+
+.navbar__title {
+  font-family: var(--ifm-font-family-monospace);
+  font-weight: 600;
+}
+
+.navbar__link,
+.menu__link {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.menu__link--active {
+  border-left: 2px solid var(--accent);
+  border-radius: 0;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+a {
+  text-underline-offset: 4px;
+}
+
+code {
+  background: var(--card);
+  border: none;
+}
+
+.footer {
+  border-top: 1px solid var(--line);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 11px;
+  color: var(--dim);
+}
+
+.theme-doc-sidebar-container {
+  border-right: 1px solid var(--line) !important;
+}
+
+table {
+  display: table;
+  width: 100%;
+}
+
+/* focus = accent stroke, never hidden */
+a:focus-visible,
+button:focus-visible {
+  outline: none;
+  box-shadow: 0 2px 0 0 var(--accent);
+}

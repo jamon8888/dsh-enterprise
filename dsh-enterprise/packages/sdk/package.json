@@ -1,0 +1,22 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise consumer SDK — Cordis-aware facade over chains, gateway, watchtower, iit-guards",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis",
+    "@deepseek-ai/dsh-session": "catalog:dshSession"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

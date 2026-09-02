@@ -1,0 +1,26 @@
+[workspace]
+members = ["packages/iit-core"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+authors = ["DSH Enterprise"]
+repository = "https://github.com/your-org/dsh-enterprise"
+
+[workspace.lints.rust]
+unsafe_code = "warn"
+
+[workspace.lints.clippy]
+all = "warn"
+pedantic = "warn"
+
+[workspace.dependencies]
+ruvector-consciousness = { version = "2.1", features = ["phi", "emergence", "collapse", "wasm"] }
+elara-active-inference = "0.1"
+deep_causality_core = { version = "0.11", default-features = false, features = ["std"] }
+wasm-bindgen = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde-wasm-bindgen = "0.6"
+getrandom = { version = "0.2", features = ["js"] }

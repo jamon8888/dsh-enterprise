@@ -98,7 +98,7 @@ describe('IIT advanced guards integration', () => {
     })
 
     try {
-      await ctx.emit('tools/guard', { tool: 'tool:bash', args: { command: 'rm -rf /' } })
+      await ctx.emit('tools/guard', { tpm: { n: 0 }, state: 0, tool: 'tool:bash', args: { command: 'rm -rf /' } })
     } catch (e) {
       expect((e as Error).message).toContain('effect-ethos')
       return
