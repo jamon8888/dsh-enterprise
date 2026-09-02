@@ -1,0 +1,26 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-dsh-pr-agent",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise PR agent — GitHub PR review stub (Cordis plugin)",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": ["lib/"],
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "vitest": "^3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}

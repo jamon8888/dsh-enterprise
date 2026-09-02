@@ -1,0 +1,24 @@
+{
+  "name": "@deepseek-ai/dsh-event-log",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Append-only event log for DSH Enterprise — Cordis plugin that records all agent events as an immutable log with SQLite projection",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis",
+    "sql.js": "^1.10.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/sql.js": "^1.4.9",
+    "@vitest/coverage-v8": "^4.1.11",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.11"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-dsh-mneme",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise dsh-mneme \u2014 SQLite recall/store + session/event auto-store (Cordis plugin)",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib/"
+  ],
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "vitest": "^3",
+    "typescript": "^5.9.3",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.0.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^9.2.0"
+  }
+}

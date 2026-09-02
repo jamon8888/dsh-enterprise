@@ -1,0 +1,22 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-gateway",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise gateway — budget enforcement + metering + envelope store (reimplementation of facility/services/gateway, not a package import)",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis",
+    "@deepseek-ai/schemastery": "catalog:schemastery"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

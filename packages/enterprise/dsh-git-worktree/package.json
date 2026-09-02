@@ -1,0 +1,31 @@
+{
+  "name": "@deepseek-ai/dsh-enterprise-dsh-git-worktree",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DSH Enterprise git-worktree — git worktree CLI wrapper (Cordis plugin)",
+  "license": "MIT OR Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib/"
+  ],
+  "dependencies": {
+    "@deepseek-ai/cordis": "catalog:cordis"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^3.2.7",
+    "typescript": "^5.9.3",
+    "vitest": "^3"
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}

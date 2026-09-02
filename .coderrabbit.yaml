@@ -1,0 +1,164 @@
+version: 2
+
+tone: informal
+
+github_checks:
+  annotation: true
+  collapsewalk: false
+  status: true
+  changedonly: false
+
+cli:
+  human_title_format: "[{sha}] {title} (#{pr})"
+  collapsewalk: false
+  annotation_title_format: "[{profile}] {annotation_title}"
+
+review_statuses:
+  - In Review
+  - Needs Reply
+
+rules:
+  path_filters:
+    exclude:
+      - "**/*.lock"
+      - "**/node_modules/**"
+      - "**/*.svg"
+      - "**/*.png"
+      - "**/*.jpg"
+      - "**/vendor/**"
+      - "**/.git/**"
+      - "**/dist/**"
+      - "**/lib/**"
+      - "**/pkg/**"
+      - "**/coverage/**"
+
+  impl_labels:
+    enabled: true
+    labels:
+      - feature
+      - bug
+      - refactor
+      - test
+      - docs
+      - chore
+      - perf
+      - security
+
+  code_block:
+    multiline: "# lang"
+    docstring: "# example"
+    comment: []
+    block_words: []
+    names: []
+    exclude_files:
+      - "**/*.test.ts"
+      - "**/*.spec.ts"
+      - "**/tests/**"
+      - "**/__mocks__/**"
+
+  top_camel_deps:
+    exclude: []
+
+  import:
+    enabled: true
+    hide_framework_prefix: true
+
+  any_char重复:
+    enabled: false
+
+  ai:
+    description: |
+      You are a senior software engineer reviewing a commercial enterprise software release.
+      Focus on correctness, security, commercial viability, and ponytail upgrade paths.
+    prompts:
+      - when_any: |
+          This PR introduces a new commercial enterprise plugin or capability.
+          Review for: (1) API design — minimal and composable surface area.
+          (2) Error handling — fails loud at misconfiguration. (3) ponytail ceilings —
+          stubs clearly marked and upgrade paths documented. (4) Commercial positioning —
+          README leads with unique value. (5) Test coverage — edge cases and error paths.
+      - when_change: |
+          ## Code Review: {file}
+          {emoji} {title}
+          {body}
+          @coderabbitai full review
+      - when_file: |
+          ## File: {file}
+          Review this implementation for correctness and commercial quality.
+
+  auto_title:
+    placeholder: ""
+
+  chat:
+    auto_title: false
+    title_blank_threshold: 0.5
+    summarize_completed_threshold: 25
+    summarize_incomplete_threshold: 10
+    allow_grooming: false
+    allow_list:
+      - jamon8888
+
+  crow:
+    product: DSH Enterprise
+
+  eager:
+    enabled: false
+
+  entity_tags:
+    enabled: true
+
+  inline_doc:
+    enabled: true
+    docguard: true
+
+  max_code_children: 50
+  max_line_children: 40
+
+  navigation:
+    flatten_depth: 3
+    sections:
+      - name: core
+        paths:
+          - "packages/guards-iit/src/**/*.ts"
+          - "packages/enterprise/dsh-secrets/src/**/*.ts"
+          - "packages/enterprise/dsh-otel/src/**/*.ts"
+          - "packages/enterprise/dsh-cost-tracker/src/**/*.ts"
+          - "packages/enterprise/dsh-sla-monitor/src/**/*.ts"
+      - name: release
+        paths:
+          - "packages/enterprise/dsh-release/src/**/*.ts"
+          - "packages/enterprise/dsh-mneme/src/**/*.ts"
+      - name: infra
+        paths:
+          - ".github/workflows/*.yml"
+          - "package.json"
+          - "cordis.patch.yml"
+          - "enterprise.patch.yml"
+      - name: docs
+        paths:
+          - "README.md"
+          - "FACILITY.md"
+          - "packages/*/README.md"
+          - "packages/enterprise/*/README.md"
+
+  paragraph_colon: ": "
+
+  prior_art:
+    enabled: false
+
+  profile:
+    name: review_summary
+    overview: |
+      You are reviewing the dsh-enterprise commercial release — a monorepo of
+      22 DeepSeek Harness enterprise plugins. The flagship is guards-iit (11 IIT
+      consciousness guards). The PR adds CI/CD, production-readiness for guards-iit
+      and dsh-release, a commercial bundle, and partial facility wiring.
+
+  request_changes_workflow:
+    mode: global
+
+  sequence:
+    enabled: false
+
+  walk_params:
+    max: 10
