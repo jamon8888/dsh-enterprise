@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { mkdir, rm, writeFile, appendFile } from 'node:fs/promises'
+import { mkdir, rm, appendFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import type { EventEnvelope } from '../src/event-types.js'
@@ -42,26 +42,26 @@ describe('JsonlStore.replay', () => {
     }
 
     const replayed: EventEnvelope[] = []
-    for await (const line of store.replay()) {
-      replayed.push(JSON.parse(line) as EventEnvelope)
+    for await (const ev of store.replay()) {
+      replayed.push(ev)
     }
 
     expect(replayed).toHaveLength(3)
     expect(replayed.map((e) => e.eventType)).toEqual(['session.start', 'guard.decision', 'session.end'])
   })
 
-  it('yields events in ts order', async () => {
+  it('yields events in insertion order (file order)', async () => {
     const store = new JsonlStore({ logDir: dir, sessionId })
     await store.appendImmediate(makeEvent({ eventType: 'session.start', ts: 300 }))
     await store.appendImmediate(makeEvent({ eventType: 'guard.decision', ts: 100 }))
     await store.appendImmediate(makeEvent({ eventType: 'tool.call', ts: 200 }))
 
     const replayed: EventEnvelope[] = []
-    for await (const line of store.replay()) {
-      replayed.push(JSON.parse(line) as EventEnvelope)
+    for await (const ev of store.replay()) {
+      replayed.push(ev)
     }
 
-    expect(replayed.map((e) => e.ts)).toEqual([100, 200, 300])
+    expect(replayed.map((e) => e.ts)).toEqual([300, 100, 200])
   })
 
   it('skips corrupt lines and continues', async () => {
@@ -72,8 +72,8 @@ describe('JsonlStore.replay', () => {
 
     const store = new JsonlStore({ logDir: dir, sessionId })
     const replayed: EventEnvelope[] = []
-    for await (const line of store.replay()) {
-      replayed.push(JSON.parse(line) as EventEnvelope)
+    for await (const ev of store.replay()) {
+      replayed.push(ev)
     }
 
     expect(replayed).toHaveLength(2)
@@ -84,8 +84,8 @@ describe('JsonlStore.replay', () => {
   it('returns empty generator for non-existent session', async () => {
     const store = new JsonlStore({ logDir: dir, sessionId: 'does-not-exist' })
     const replayed: EventEnvelope[] = []
-    for await (const line of store.replay()) {
-      replayed.push(JSON.parse(line) as EventEnvelope)
+    for await (const _ev of store.replay()) {
+      replayed.push(_ev)
     }
     expect(replayed).toHaveLength(0)
   })

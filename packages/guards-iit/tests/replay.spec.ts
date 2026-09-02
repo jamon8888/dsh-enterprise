@@ -50,7 +50,7 @@ describe('JsonlStore.replay', () => {
     expect(replayed.map((e) => e.eventType)).toEqual(['session.start', 'guard.decision', 'session.end'])
   })
 
-  it('yields events in ts order', async () => {
+  it('yields events in insertion order (file order)', async () => {
     const store = new JsonlStore({ logDir: dir, sessionId })
     await store.appendImmediate(makeEvent({ eventType: 'session.start', ts: 300 }))
     await store.appendImmediate(makeEvent({ eventType: 'guard.decision', ts: 100 }))
