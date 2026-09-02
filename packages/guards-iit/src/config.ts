@@ -27,6 +27,10 @@ export const Config = z.object({
   boundaryFrontier: z.object({
     minBoundaryPhi: z.number().default(0.1),
   }).default({ minBoundaryPhi: 0.1 }),
+  effectEthos: z.object({
+    teloidsYaml: z.string().default(''),
+    severity: z.enum(['error', 'warn']).default('warn'),
+  }).default({ teloidsYaml: '', severity: 'warn' }),
 })
 
 export type Config = z.infer<typeof Config>
