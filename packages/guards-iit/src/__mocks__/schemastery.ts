@@ -19,6 +19,7 @@ const z: any = {
   boolean: () => chainable(),
   array: () => chainable(),
   enum: enumChainable,
+  union: enumChainable,
 }
 z.default = z
 export default z

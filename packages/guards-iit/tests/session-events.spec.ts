@@ -1,6 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import { apply, GuardError } from '../src/guard-runner.ts'
 
+// Real WASM pkg is not built in CI/root lane (see src/__mocks__/iit-core-pkg.ts,
+// also aliased in vitest.config.ts for the mock lane). Mock it here so the
+// full-stack tests resolve identically in both lanes.
+vi.mock('@deepseek-ai/dsh-enterprise-iit-core/pkg', async () => {
+  const mock = await import('../src/__mocks__/iit-core-pkg.ts')
+  return mock
+})
+
 function mockCtx(overrides: Record<string, unknown> = {}) {
   const handlers: Record<string, unknown> = {}
   const emitCalls: { event: string; payload: unknown }[] = []
@@ -96,7 +104,7 @@ describe('iit-guard.decision session events', () => {
       (c) => (c.payload as { disposition: string }).disposition === 'block',
     )
     expect(blockEvents.length).toBeGreaterThan(0)
-    const block = blockEvents[0].payload as { guardId: string; disposition: string; phi?: number; reason?: string }
+    const block = blockEvents[0]!.payload as { guardId: string; disposition: string; phi?: number; reason?: string }
     expect(block.guardId).toBe('phi-threshold')
     expect(block.disposition).toBe('block')
     expect(block.phi).toBe(0.01)
@@ -131,7 +139,7 @@ describe('iit-guard.decision session events', () => {
       (c) => (c.payload as { disposition: string }).disposition === 'warn',
     )
     expect(warnEvents.length).toBeGreaterThan(0)
-    const warn = warnEvents[0].payload as { guardId: string; disposition: string; reason?: string; ignorable?: true }
+    const warn = warnEvents[0]!.payload as { guardId: string; disposition: string; reason?: string; ignorable?: true }
     expect(warn.guardId).toBe('effect-ethos')
     expect(warn.disposition).toBe('warn')
     expect(warn.reason).toContain('effect-ethos')
@@ -223,7 +231,7 @@ describe('iit-guard.decision session events', () => {
     const ctx = { emit: (e: string, p: unknown) => { calls.push({ event: e, payload: p }) } } as any
     emitGuardDecision(ctx, 'effect-ethos', { disposition: 'warn', reason: 'norm broken', violated: ['no-homicide'] })
     expect(calls.length).toBe(1)
-    const p = calls[0].payload as { guardId: string; violated?: string[] }
+    const p = calls[0]!.payload as { guardId: string; violated?: string[] }
     expect(p.violated).toEqual(['no-homicide'])
   })
 

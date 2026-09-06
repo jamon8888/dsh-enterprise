@@ -149,7 +149,7 @@ describe('dsh-release', () => {
       .mockReturnValueOnce('') // cosign sign
 
     const svc = new ReleaseService('/default/root')
-    await svc.cut('4.0.0', { projectRoot: '/custom/root' })
+    await svc.cut('4.0.0', { version: '4.0.0', projectRoot: '/custom/root' })
     expect(mockExecSync).toHaveBeenNthCalledWith(1, 'which syft', expect.any(Object))
   })
 })

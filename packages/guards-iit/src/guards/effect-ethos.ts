@@ -11,7 +11,7 @@ export const effectEthosGuard = {
   id: 'effect-ethos' as const,
   Config: z.object({
     teloidsYaml: z.string().default(''),
-    severity: z.enum(['error', 'warn']).default('warn'),
+    severity: z.union(['error', 'warn']).default('warn'),
   }),
   async run(
     ctx: Context,

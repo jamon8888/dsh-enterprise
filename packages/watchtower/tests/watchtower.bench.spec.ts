@@ -108,7 +108,7 @@ describe('watchtower.bench — runWatchtowerJob with budgetCapped terminal-bench
     })
     expect((res as { blocked?: boolean }).blocked).not.toBe(true)
     // benchmark envelope assertions
-    const stored = benchmarkRunEvents.get((res as { runId: string }).runId)
+    const stored = benchmarkRunEvents.get((res as { runId: string }).runId) as any
     expect(stored).toBeDefined()
     expect(stored!.suite).toBe('terminal-bench')
     expect(stored!.cost.usd).toBeCloseTo(0.5)

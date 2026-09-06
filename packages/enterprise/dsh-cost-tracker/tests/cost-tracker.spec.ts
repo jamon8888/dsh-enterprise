@@ -70,7 +70,7 @@ describe('dsh-cost-tracker', () => {
     })
 
     it('with pg client', () => {
-      const pg = { insert: vi.fn(async () => {}) }
+      const pg = { insert: vi.fn(async (..._args: any[]) => {}) }
       const tracker = new CostTracker(pg as any)
       expect(tracker.rows).toEqual([])
     })
@@ -112,7 +112,7 @@ describe('dsh-cost-tracker', () => {
     })
 
     it('tokens = 0 still creates a row via direct record()', async () => {
-      const pg = { insert: vi.fn(async () => {}) }
+      const pg = { insert: vi.fn(async (..._args: any[]) => {}) }
       const tracker = new CostTracker(pg as any)
       const row = await tracker.record('org-1', 'm', 0)
       expect(row.tokens).toBe(0)
@@ -125,7 +125,7 @@ describe('dsh-cost-tracker', () => {
 
   describe('gateway/request hook', () => {
     it('waterfall records spend per org', async () => {
-      const pg = { insert: vi.fn(async () => {}) }
+      const pg = { insert: vi.fn(async (..._args: any[]) => {}) }
       const { ctx, services } = mockCtx(pg)
       apply(ctx)
       const svc = services['cost-tracker'] as { record: any; rows: any[] }
@@ -143,7 +143,7 @@ describe('dsh-cost-tracker', () => {
     })
 
     it('second org is isolated', async () => {
-      const pg = { insert: vi.fn(async () => {}) }
+      const pg = { insert: vi.fn(async (..._args: any[]) => {}) }
       const { ctx, services } = mockCtx(pg)
       apply(ctx)
       await ctx.waterfall(
@@ -162,7 +162,7 @@ describe('dsh-cost-tracker', () => {
     })
 
     it('tokens = 0 → skips pg.insert in gateway/request hook', async () => {
-      const pg = { insert: vi.fn(async () => {}) }
+      const pg = { insert: vi.fn(async (..._args: any[]) => {}) }
       const { ctx } = mockCtx(pg)
       apply(ctx)
       await ctx.waterfall(
@@ -174,7 +174,7 @@ describe('dsh-cost-tracker', () => {
     })
 
     it('tokens = 0 via totalTokens = 0 → skips pg.insert', async () => {
-      const pg = { insert: vi.fn(async () => {}) }
+      const pg = { insert: vi.fn(async (..._args: any[]) => {}) }
       const { ctx } = mockCtx(pg)
       apply(ctx)
       await ctx.waterfall(
@@ -186,7 +186,7 @@ describe('dsh-cost-tracker', () => {
     })
 
     it('ev.promptTokens + ev.completionTokens path', async () => {
-      const pg = { insert: vi.fn(async () => {}) }
+      const pg = { insert: vi.fn(async (..._args: any[]) => {}) }
       const { ctx } = mockCtx(pg)
       apply(ctx)
       await ctx.waterfall(
@@ -200,7 +200,7 @@ describe('dsh-cost-tracker', () => {
     })
 
     it('result.usage path', async () => {
-      const pg = { insert: vi.fn(async () => {}) }
+      const pg = { insert: vi.fn(async (..._args: any[]) => {}) }
       const { ctx } = mockCtx(pg)
       apply(ctx)
       await ctx.waterfall(
@@ -215,7 +215,7 @@ describe('dsh-cost-tracker', () => {
     })
 
     it('no token fields → falls to else tokens=0, no pg call', async () => {
-      const pg = { insert: vi.fn(async () => {}) }
+      const pg = { insert: vi.fn(async (..._args: any[]) => {}) }
       const { ctx } = mockCtx(pg)
       apply(ctx)
       await ctx.waterfall(
@@ -227,7 +227,7 @@ describe('dsh-cost-tracker', () => {
     })
 
     it('ev.usage.totalTokens=0 but ev.tokens>0 → else-if path records ev.tokens', async () => {
-      const pg = { insert: vi.fn(async () => {}) }
+      const pg = { insert: vi.fn(async (..._args: any[]) => {}) }
       const { ctx } = mockCtx(pg)
       apply(ctx)
       await ctx.waterfall(

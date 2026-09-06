@@ -1,5 +1,4 @@
 {
-  "extends": "@deepseek-ai/tsconfig/host.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",

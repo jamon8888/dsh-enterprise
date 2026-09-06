@@ -1,4 +1,8 @@
-import type { SessionId, UserId } from '@deepseek-ai/dsh-session'
+// Session/user ids are plain strings here: this package is outside the pnpm
+// workspace so @deepseek-ai/dsh-session is not linked, and dsh-session
+// exports no UserId at all. Keep collab self-contained.
+export type SessionId = string
+export type UserId = string
 
 /**
  * Permission levels for session collaborators

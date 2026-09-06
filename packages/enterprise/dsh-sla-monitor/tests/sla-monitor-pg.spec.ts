@@ -36,10 +36,10 @@ describe('sla-monitor pg query', () => {
   })
 
   it('p99 query uses percentile_cont(0.99) WITHIN GROUP for run_events lookback', async () => {
-    const query = vi.fn(async () => [])
+    const query = vi.fn(async (..._args: any[]): Promise<any[]> => [])
     const pg = { query }
     const { ctx } = mockCtx(pg)
-    apply(ctx, { pg })
+    apply(ctx)
 
     // Simulate the PG path that would be triggered for historical p99 lookback:
     // SELECT percentile_cont(0.99) WITHIN GROUP (ORDER BY duration_ms)
@@ -67,10 +67,10 @@ describe('sla-monitor pg query', () => {
   })
 
   it('guard block_rate query uses COUNT with GuardError filter', async () => {
-    const query = vi.fn(async () => [])
+    const query = vi.fn(async (..._args: any[]): Promise<any[]> => [])
     const pg = { query }
     const { ctx } = mockCtx(pg)
-    apply(ctx, { pg })
+    apply(ctx)
 
     const orgId = 'org-1'
     const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()

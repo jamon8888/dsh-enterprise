@@ -6,6 +6,7 @@ declare module '@deepseek-ai/schemastery' {
     boolean: () => any
     array: (t: any) => any
     enum: (vals: any) => any
+    union: (vals: any) => any
   } & {
     infer: any
   } & ((...args: any[]) => any)

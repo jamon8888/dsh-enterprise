@@ -64,13 +64,14 @@ async function callSidecar(
 export function apply(ctx: Context, cfg: AarBridgeConfig): void {
   const config: AarBridgeConfig = { ...DEFAULT_CONFIG, ...cfg }
 
-  ctx.effect('aarBridge', () => ({
+  const fx: any = ctx.effect
+  fx('aarBridge', () => ({
     scoreSession: async (sessionId: string): Promise<AarScore | null> => {
       const buf = sessions.get(sessionId)
       if (!buf) return null
       const score = await callSidecar(config, sessionId, buf.decisions)
       sessions.delete(sessionId)
-      ;(ctx.emit as (event: string, payload: unknown) => void)('aar/score', score)
+      ;((ctx as any).emit as (event: string, payload: unknown) => void)('aar/score', score)
       return score
     },
     scoreSessionSync: (sessionId: string): AarScore | null => {
@@ -78,13 +79,13 @@ export function apply(ctx: Context, cfg: AarBridgeConfig): void {
       if (!buf) return null
       const score = computeSyncScore(sessionId, buf.decisions)
       sessions.delete(sessionId)
-      ;(ctx.emit as (event: string, payload: unknown) => void)('aar/score', score)
+      ;((ctx as any).emit as (event: string, payload: unknown) => void)('aar/score', score)
       return score
     },
     bufferSize: () => sessions.size,
   }))
 
-  ctx.on('iit-guard.decision' as any, (ev: GuardDecision & { sessionId?: string }) => {
+  ;(ctx.on as any)('iit-guard.decision', (ev: GuardDecision & { sessionId?: string }) => {
     const sessionId = (ev as any).sessionId ?? 'default'
     const buf = upsertBuffer(sessionId)
     buf.decisions.push({

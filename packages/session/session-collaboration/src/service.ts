@@ -58,7 +58,7 @@ export class SessionCollaborationService implements Service {
     await this.ensureCollaboratorsTable()
     
     // Subscribe to presence changes
-    this.presenceManager.getRedisClient().on('message', (channel, message) => {
+    this.presenceManager.getRedisClient().on('message', (channel: string, message: string) => {
       if (channel.startsWith('dsh:session:presence:channel:')) {
         try {
           const event: PresenceChangeEvent = JSON.parse(message)
@@ -315,10 +315,11 @@ export class SessionCollaborationService implements Service {
    */
   async hasPermission(sessionId: SessionId, userId: UserId, permission: Permission): Promise<boolean> {
     const permissions = await this.getPermissions(sessionId, userId)
+    if (permissions.length === 0) return false
     const hierarchy: Permission[] = ['read', 'write', 'admin', 'owner']
-    const userLevel = hierarchy.indexOf(permissions.find(p => hierarchy.includes(p)) || 'read')
+    const userLevel = Math.max(...permissions.map((p) => hierarchy.indexOf(p)))
     const requiredLevel = hierarchy.indexOf(permission)
-    return userLevel >= requiredLevel
+    return requiredLevel !== -1 && userLevel >= requiredLevel
   }
 
   // ===== Database operations =====
@@ -379,7 +380,7 @@ export class SessionCollaborationService implements Service {
         `SELECT user_id, joined_at, permissions, is_owner FROM ${COLLABORATORS_TABLE} WHERE session_id = $1 ORDER BY joined_at ASC`,
         [sessionId]
       )
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         user_id: row.user_id,
         joined_at: row.joined_at,
         permissions: row.permissions,

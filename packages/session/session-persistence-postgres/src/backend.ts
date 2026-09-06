@@ -1,8 +1,10 @@
-import { Context, Service } from 'cordis'
+import type { Context } from 'cordis'
+import { Service } from 'cordis'
 import { z } from 'schemastery'
-import pg, { Pool, PoolClient, QueryResult } from 'pg'
+import pg from 'pg'
+import type { PoolClient, QueryResult } from 'pg'
 import { copyFrom } from 'pg-copy-streams'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
+import type { SessionEvent } from './types.js'
 import type {
   PostgresPersistenceConfig,
   SessionRecord,
@@ -39,11 +41,14 @@ interface ReceiptRow {
   prev_hash: string
   log_hash: string
   outcome: string
-  cost: unknown
-  guard_dispositions: unknown
+  // ponytail: agent_id/phi_snapshot have no DDL column yet (see 002 migration);
+  // read as nullable until the migration lands.
+  agent_id: string | null
+  cost: Receipt['cost'] | null
+  guard_dispositions: Receipt['guardDispositions'] | null
   built_at: number
-  builder: unknown
-  phi_snapshot: unknown
+  builder: Receipt['builder'] | null
+  phi_snapshot: Receipt['phiSnapshot'] | null
 }
 
 const { Pool: PgPool } = pg
@@ -62,7 +67,7 @@ export class PostgresPersistenceBackend extends Service {
   })
 
   private pool: MigrationPool
-  private config: PostgresPersistenceConfig
+  readonly config: PostgresPersistenceConfig
   private notifyClient: PoolClient | null = null
   private notificationHandlers: Set<(notification: EventNotification) => void> = new Set()
   private isMigrated = false
@@ -121,7 +126,7 @@ export class PostgresPersistenceBackend extends Service {
       const applied = await client.query<MigrationRecord>(
         `SELECT version, name, applied_at FROM ${this.config.schema}.schema_migrations ORDER BY version`
       )
-      const appliedVersions = new Set(applied.rows.map(r => r.version))
+      const appliedVersions = new Set(applied.rows.map((r: any) => r.version))
 
       // Run pending migrations
       const migrations = [
@@ -245,7 +250,7 @@ export class PostgresPersistenceBackend extends Service {
       }
     })
 
-    this.notifyClient.on('error', (error) => {
+    this.notifyClient.on('error', (error: any) => {
       this.ctx.logger.error('Realtime notification client error', error)
     })
   }
@@ -553,7 +558,7 @@ export class PostgresPersistenceBackend extends Service {
     return {
       runId: row.run_id as Receipt['runId'],
       sessionId: row.session_id as Receipt['sessionId'],
-      agentId: row.agent_id,
+      agentId: row.agent_id ?? '',
       prevHash: row.prev_hash,
       logHash: row.log_hash,
       phiSnapshot: row.phi_snapshot ?? { phi: 0, method: 'unknown', cesHash: 'none' },
@@ -605,7 +610,7 @@ export class PostgresPersistenceBackend extends Service {
       const result = await client.query<ReceiptRow>(
         `SELECT * FROM ${this.config.schema}.receipts ORDER BY built_at ASC`,
       )
-      return result.rows.map((r) => this.receiptRowToReceipt(r))
+      return result.rows.map((r: any) => this.receiptRowToReceipt(r))
     } finally {
       client.release()
     }

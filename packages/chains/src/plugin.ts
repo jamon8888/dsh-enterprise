@@ -51,7 +51,7 @@ export async function apply(ctx: Context): Promise<void> {
           if (explicit === 'research' || explicit === 'research-chain') return researchChain
           return researchChain
         },
-      } as typeof import('@facility/harness/chains')
+      } as unknown as typeof import('@facility/harness/chains')
     }
 
   ctx.effect('chains', () => ({

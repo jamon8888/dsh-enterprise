@@ -3,7 +3,7 @@ import { apply } from '../src/plugin.js'
 
 function mockCtx() {
   const handlers: Record<string, unknown> = {}
-  const ctx: Record<string, unknown> = {
+  const ctx: Record<string, any> = {
     effect: vi.fn((nameOrFn: unknown, fn?: unknown) => {
       const svc = typeof nameOrFn === 'string' ? (fn as () => unknown)() : (nameOrFn as () => unknown)()
       return () => {}
@@ -29,8 +29,8 @@ describe('AAR Bridge plugin', () => {
 
   it('registers aarBridge effect with scoreSession, scoreSessionSync, bufferSize', () => {
     apply(ctx as never, { aarSidecarUrl: 'http://localhost:8787', timeoutMs: 5000, failOpen: true })
-    const effectCall = (ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0]
-    const effectFn = effectCall[1] as () => unknown
+    const effectCall = (ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0]!
+    const effectFn = effectCall[1] as () => any
     const effect = effectFn()
     expect(typeof effect.scoreSession).toBe('function')
     expect(typeof effect.scoreSessionSync).toBe('function')
@@ -44,7 +44,7 @@ describe('AAR Bridge plugin', () => {
 
   it('scoreSessionSync returns null when session not found', () => {
     apply(ctx as never, { aarSidecarUrl: 'http://localhost:8787', timeoutMs: 5000, failOpen: true })
-    const effectFn = ((ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0][1] as () => unknown)
+    const effectFn = ((ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0]![1] as () => any)
     const effect = effectFn()
     expect(effect.scoreSessionSync('nonexistent')).toBeNull()
   })
@@ -57,7 +57,7 @@ describe('AAR Bridge plugin', () => {
     onHandler({ guardId: 'causal-emergence', disposition: 'warn', phi: 0.3, timestamp: 2000, sessionId: 's1' })
     onHandler({ guardId: 'phi-threshold', disposition: 'block', phi: 0.05, timestamp: 3000, sessionId: 's1' })
 
-    const effectFn = ((ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0][1] as () => unknown)
+    const effectFn = ((ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0]![1] as () => any)
     const effect = effectFn()
     expect(effect.bufferSize()).toBe(1)
 
@@ -79,7 +79,7 @@ describe('AAR Bridge plugin', () => {
     onHandler({ guardId: 'causal-emergence', disposition: 'warn', phi: 0.1, timestamp: 2000, sessionId: 's2' })
     onHandler({ guardId: 'phi-trajectory', disposition: 'pass', phi: 0.6, timestamp: 3000, sessionId: 's2' })
 
-    const effectFn = ((ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0][1] as () => unknown)
+    const effectFn = ((ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0]![1] as () => any)
     const effect = effectFn()
     const score = effect.scoreSessionSync('s2')
 
@@ -92,7 +92,7 @@ describe('AAR Bridge plugin', () => {
     const onHandler = handlers['iit-guard.decision'] as (ev: unknown) => void
     onHandler({ guardId: 'phi-threshold', disposition: 'pass', timestamp: 1000, sessionId: 's3' })
 
-    const effectFn = ((ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0][1] as () => unknown)
+    const effectFn = ((ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0]![1] as () => any)
     const effect = effectFn()
     const score = effect.scoreSessionSync('s3')
 
@@ -107,7 +107,7 @@ describe('AAR Bridge plugin', () => {
     const onHandler = handlers['iit-guard.decision'] as (ev: unknown) => void
     onHandler({ guardId: 'phi-threshold', disposition: 'pass', timestamp: 1000 })
 
-    const effectFn = ((ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0][1] as () => unknown)
+    const effectFn = ((ctx.effect as ReturnType<typeof vi.fn>).mock.calls[0]![1] as () => any)
     const effect = effectFn()
     expect(effect.bufferSize()).toBe(1)
     const score = effect.scoreSessionSync('default')

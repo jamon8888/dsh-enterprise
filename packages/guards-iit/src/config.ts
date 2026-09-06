@@ -27,9 +27,13 @@ export const Config = z.object({
   boundaryFrontier: z.object({
     minBoundaryPhi: z.number().default(0.1),
   }).default({ minBoundaryPhi: 0.1 }),
+  effectEthos: z.object({
+    teloidsYaml: z.string().default(''),
+    severity: z.union(['error', 'warn']).default('warn'),
+  }).default({ teloidsYaml: '', severity: 'warn' }),
 })
 
-export type Config = z.infer<typeof Config>
+export type Config = ReturnType<typeof Config.parse>
 
 /**
  * YAML schema written to `.dsh/iit-config.yaml` on `dsh-enterprise init`.
@@ -42,7 +46,7 @@ export function renderIitConfigYaml(cfg: Config): string {
     `minPhi: ${cfg.minPhi}`,
     `max_exact_size: ${cfg.max_exact_size}`,
     `tpmVars:`,
-    ...cfg.tpmVars.map((v) => `  - ${v}`),
+    ...cfg.tpmVars.map((v: string) => `  - ${v}`),
   ].join('\n') + '\n'
 }
 

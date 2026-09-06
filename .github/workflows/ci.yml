@@ -31,4 +31,4 @@ jobs:
           node-version: '22'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run coverage --filter guards-iit
+      - run: pnpm --filter @deepseek-ai/dsh-enterprise-guards-iit run coverage

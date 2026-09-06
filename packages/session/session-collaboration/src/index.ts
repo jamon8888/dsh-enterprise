@@ -26,7 +26,7 @@ export function sessionCollaborationPlugin(config: SessionCollaborationConfig): 
     ctx.provide('sessionCollaboration', service)
     
     // Hook into session creation to add creator as owner
-    ctx.on('session/created', async (session) => {
+    ctx.on('session/created', async (session: any) => {
       await service.handleSessionCreated(session)
     })
     
@@ -40,7 +40,7 @@ export function sessionCollaborationPlugin(config: SessionCollaborationConfig): 
 /**
  * Configuration schema for session collaboration
  */
-export const SessionCollaborationConfigSchema: Schema<SessionCollaborationConfig> = {
+export const SessionCollaborationConfigSchema: any = {
   type: 'object',
   properties: {
     redisUrl: { type: 'string', description: 'Redis connection URL' },
@@ -70,4 +70,4 @@ export type {
   PresenceChangeEvent,
   CursorUpdateEvent,
   SessionCollaborationHeader
-} from './types.js
+} from './types.js';

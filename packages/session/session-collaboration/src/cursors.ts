@@ -300,7 +300,7 @@ export class CursorSyncManager {
       hash = userId.charCodeAt(i) + ((hash << 5) - hash)
     }
     
-    return colors[Math.abs(hash) % colors.length]
+    return colors[Math.abs(hash) % colors.length] ?? '#FF6B6B'
   }
 
   /**

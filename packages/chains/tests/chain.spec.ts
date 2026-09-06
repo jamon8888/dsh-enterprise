@@ -14,13 +14,10 @@ try {
   validate = validateMod.validate
   harnessLoaded = true
 } catch {
-  // Fallback to sibling reference clone (test/facility) for local verification without pnpm install
-  const require = createRequire(import.meta.url)
-  const chainMod = require('/home/jamin/Documents/test/facility/packages/harness/src/chain.ts') as any
-  // In src form chainFromConfig is defined; we mimic bundled shape
-  // Import via dynamic fallback: use the source file directly via tsx? For minimal, inline the logic.
-  // Instead, load compiled via require of ts via using the source — we re-implement minimal chainFromConfig check here.
-  // To avoid TS import complexity, just define lightweight mocks that satisfy test semantics.
+  // @facility/harness subpaths are not resolvable from this package
+  // (git dep layout) — use inline mocks that satisfy test semantics.
+  // ponytail: mocks stand in for facility; real wiring when facility
+  // ships proper npm subpath exports (see FACILITY.md).
   const WsjfSchema = { safeParse: () => ({ success: true }) } as any
   const mk = (id: string, types: any) => ({ id, types })
   productChain = {

@@ -32,7 +32,7 @@ export async function validateToken(jwt: string, jwksUrl: string, issuer: string
 
 export const name = 'dsh-enterprise:auth';
 export const inject = ['sessions', 'tools'] as const;
-export function apply(ctx: any, config: z.infer<typeof Config>) {
+export function apply(ctx: any, config: ReturnType<typeof Config.parse>) {
   // helper to emit auth/permission-check waterfall so triad can intercept
   async function emitPermissionCheck(ev: any): Promise<void> {
     if (typeof ctx.waterfall === 'function') {
