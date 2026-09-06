@@ -16,6 +16,7 @@ function getGuardConfig(guardId: string, cfg: Config): Record<string, unknown> {
     case 'phi-trajectory': return { ...cfg.phiTrajectory }
     case 'mip-shift': return { ...cfg.mipShift }
     case 'boundary-frontier': return { ...cfg.boundaryFrontier }
+    case 'effect-ethos': return { effectEthos: cfg.effectEthos }
     default: return {}
   }
 }
@@ -63,7 +64,6 @@ const TPM_DEPENDENT = new Set([
   'catastrophe-cusp',
   'workspace-ignition',
   'free-energy',
-  'effect-ethos',
 ])
 
 export const name = 'dsh-enterprise:guards-iit'
