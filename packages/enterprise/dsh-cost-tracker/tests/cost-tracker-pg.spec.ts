@@ -36,7 +36,7 @@ describe('cost-tracker pg insert', () => {
   })
 
   it('pg.insert called with SpendRow shape', async () => {
-    const insert = vi.fn(async () => {})
+    const insert = vi.fn(async (..._args: any[]) => {})
     const pg = { insert }
     const tracker = new CostTracker(pg as any)
     const row = await tracker.record('org-test', 'deepseek-chat', 1000)
@@ -52,7 +52,7 @@ describe('cost-tracker pg insert', () => {
   })
 
   it('gateway/request hook: pg.insert NOT called when tokens = 0', async () => {
-    const insert = vi.fn(async () => {})
+    const insert = vi.fn(async (..._args: any[]) => {})
     const pg = { insert }
     const { ctx } = mockCtx(pg)
     const { apply } = await import('../src/plugin.js')
@@ -66,7 +66,7 @@ describe('cost-tracker pg insert', () => {
   })
 
   it('gateway/request hook: pg.insert called for positive tokens', async () => {
-    const insert = vi.fn(async () => {})
+    const insert = vi.fn(async (..._args: any[]) => {})
     const pg = { insert }
     const { ctx } = mockCtx(pg)
     const { apply } = await import('../src/plugin.js')
@@ -83,7 +83,7 @@ describe('cost-tracker pg insert', () => {
   })
 
   it('pg.insert called for various token shapes', async () => {
-    const insert = vi.fn(async () => {})
+    const insert = vi.fn(async (..._args: any[]) => {})
     const pg = { insert }
     const tracker = new CostTracker(pg as any)
     await tracker.record('o', 'm', { totalTokens: 500 } as any)
@@ -95,7 +95,7 @@ describe('cost-tracker pg insert', () => {
   })
 
   it('multiple records each call pg.insert once', async () => {
-    const insert = vi.fn(async () => {})
+    const insert = vi.fn(async (..._args: any[]) => {})
     const pg = { insert }
     const tracker = new CostTracker(pg as any)
     await tracker.record('o1', 'm', 100)

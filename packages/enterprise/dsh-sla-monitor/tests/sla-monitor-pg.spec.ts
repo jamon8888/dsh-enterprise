@@ -36,7 +36,7 @@ describe('sla-monitor pg query', () => {
   })
 
   it('p99 query uses percentile_cont(0.99) WITHIN GROUP for run_events lookback', async () => {
-    const query = vi.fn(async () => [])
+    const query = vi.fn(async (..._args: any[]): Promise<any[]> => [])
     const pg = { query }
     const { ctx } = mockCtx(pg)
     apply(ctx, { pg })
@@ -67,7 +67,7 @@ describe('sla-monitor pg query', () => {
   })
 
   it('guard block_rate query uses COUNT with GuardError filter', async () => {
-    const query = vi.fn(async () => [])
+    const query = vi.fn(async (..._args: any[]): Promise<any[]> => [])
     const pg = { query }
     const { ctx } = mockCtx(pg)
     apply(ctx, { pg })
