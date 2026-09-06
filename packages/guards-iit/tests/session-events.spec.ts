@@ -83,6 +83,47 @@ describe('iit-guard.decision session events', () => {
     }
   })
 
+  it('emits viability warn decision with viabilityIndex after declining trajectory', async () => {
+    const { ctx, handlers, emitCalls } = mockCtx({
+      services: {
+        iitGuards: {
+          calculatePhi: async () => ({ phi: 0.5, cesHash: 'abc' }),
+          runCusp: async () => ({ ok: true }),
+        },
+      },
+    })
+    apply(
+      ctx as never,
+      {
+        minPhi: 0.1,
+        max_exact_size: 15,
+        tpmVars: ['tool_success'],
+        phiTrajectory: { window: 10, maxDrop: 0.15, maxSlope: -0.02 },
+      } as never,
+    )
+    const onHandler = handlers['tools/guard'] as
+      | ((ev: unknown, next: (ev: unknown) => Promise<unknown>) => Promise<unknown>)
+      | undefined
+    expect(onHandler).toBeDefined()
+    const next = vi.fn(async (ev) => ({ disposition: 'pass' }))
+    const tpm = { n: 2, data: [[1, 0], [0, 1]] }
+    await onHandler!({ tpm, state: 0, sessionId: 'vi-emit', phi: 0.5 }, next as never)
+    await onHandler!({ tpm, state: 0, sessionId: 'vi-emit', phi: 0.475 }, next as never)
+    await onHandler!({ tpm, state: 0, sessionId: 'vi-emit', phi: 0.45 }, next as never)
+    const traj = emitCalls.filter(
+      (c) =>
+        c.event === 'iit-guard.decision' &&
+        (c.payload as { guardId: string }).guardId === 'phi-trajectory',
+    )
+    const last = traj[traj.length - 1]!.payload as {
+      disposition: string
+      viabilityIndex?: number
+    }
+    expect(last.disposition).toBe('warn')
+    expect(last.viabilityIndex).toBeDefined()
+    expect(last.viabilityIndex!).toBeLessThan(-0.5)
+  })
+
   it('emits block event before throwing GuardError on phi < minPhi', async () => {
     const { ctx, handlers, emitCalls } = mockCtx({
       services: {
