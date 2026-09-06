@@ -27,7 +27,7 @@ export interface GuardResult {
 /** Generic guard config zod schema (leaf guards refine this). */
 export const GuardConfig = z.object({
   enabled: z.boolean().default(true),
-  severity: z.enum(['error', 'warn']).default('error'),
+  severity: z.union(['error', 'warn']).default('error'),
 })
 
 export type GuardConfigType = {
