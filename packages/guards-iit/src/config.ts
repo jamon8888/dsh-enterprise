@@ -33,7 +33,7 @@ export const Config = z.object({
   }).default({ teloidsYaml: '', severity: 'warn' }),
 })
 
-export type Config = z.infer<typeof Config>
+export type Config = ReturnType<typeof Config.parse>
 
 /**
  * YAML schema written to `.dsh/iit-config.yaml` on `dsh-enterprise init`.
@@ -46,7 +46,7 @@ export function renderIitConfigYaml(cfg: Config): string {
     `minPhi: ${cfg.minPhi}`,
     `max_exact_size: ${cfg.max_exact_size}`,
     `tpmVars:`,
-    ...cfg.tpmVars.map((v) => `  - ${v}`),
+    ...cfg.tpmVars.map((v: string) => `  - ${v}`),
   ].join('\n') + '\n'
 }
 

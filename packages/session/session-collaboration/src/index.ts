@@ -26,7 +26,7 @@ export function sessionCollaborationPlugin(config: SessionCollaborationConfig): 
     ctx.provide('sessionCollaboration', service)
     
     // Hook into session creation to add creator as owner
-    ctx.on('session/created', async (session) => {
+    ctx.on('session/created', async (session: any) => {
       await service.handleSessionCreated(session)
     })
     

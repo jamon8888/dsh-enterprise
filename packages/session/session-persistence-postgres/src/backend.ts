@@ -123,7 +123,7 @@ export class PostgresPersistenceBackend extends Service {
       const applied = await client.query<MigrationRecord>(
         `SELECT version, name, applied_at FROM ${this.config.schema}.schema_migrations ORDER BY version`
       )
-      const appliedVersions = new Set(applied.rows.map(r => r.version))
+      const appliedVersions = new Set(applied.rows.map((r: any) => r.version))
 
       // Run pending migrations
       const migrations = [
@@ -247,7 +247,7 @@ export class PostgresPersistenceBackend extends Service {
       }
     })
 
-    this.notifyClient.on('error', (error) => {
+    this.notifyClient.on('error', (error: any) => {
       this.ctx.logger.error('Realtime notification client error', error)
     })
   }
@@ -607,7 +607,7 @@ export class PostgresPersistenceBackend extends Service {
       const result = await client.query<ReceiptRow>(
         `SELECT * FROM ${this.config.schema}.receipts ORDER BY built_at ASC`,
       )
-      return result.rows.map((r) => this.receiptRowToReceipt(r))
+      return result.rows.map((r: any) => this.receiptRowToReceipt(r))
     } finally {
       client.release()
     }

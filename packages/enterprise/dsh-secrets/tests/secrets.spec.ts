@@ -112,6 +112,7 @@ describe('dsh-secrets', () => {
       const customProvider: SecretsProvider = {
         get: (k) => (k === 'custom' ? 'custom-value' : undefined),
         set: () => {},
+        delete: () => false,
         list: () => ['custom'],
       }
       const svc = new SecretsService([customProvider])
@@ -184,11 +185,13 @@ describe('dsh-secrets', () => {
       const provider1: SecretsProvider = {
         get: () => undefined,
         set: () => {},
+        delete: () => false,
         list: () => [],
       }
       const provider2: SecretsProvider = {
         get: (k) => (k === 'KEY' ? 'from-provider2' : undefined),
         set: () => {},
+        delete: () => false,
         list: () => ['KEY'],
       }
       const svc = new SecretsService([provider1, provider2])
@@ -199,11 +202,13 @@ describe('dsh-secrets', () => {
       const provider1: SecretsProvider = {
         get: (k) => (k === 'KEY' ? 'first' : undefined),
         set: () => {},
+        delete: () => false,
         list: () => ['KEY'],
       }
       const provider2: SecretsProvider = {
         get: (k) => (k === 'KEY' ? 'second' : undefined),
         set: () => {},
+        delete: () => false,
         list: () => [],
       }
       const svc = new SecretsService([provider1, provider2])
@@ -214,11 +219,13 @@ describe('dsh-secrets', () => {
       const provider1: SecretsProvider = {
         get: () => undefined,
         set: () => {},
+        delete: () => false,
         list: () => [],
       }
       const provider2: SecretsProvider = {
         get: () => undefined,
         set: () => {},
+        delete: () => false,
         list: () => [],
       }
       const svc = new SecretsService([provider1, provider2])

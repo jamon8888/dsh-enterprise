@@ -58,7 +58,7 @@ export class SessionCollaborationService implements Service {
     await this.ensureCollaboratorsTable()
     
     // Subscribe to presence changes
-    this.presenceManager.getRedisClient().on('message', (channel, message) => {
+    this.presenceManager.getRedisClient().on('message', (channel: string, message: string) => {
       if (channel.startsWith('dsh:session:presence:channel:')) {
         try {
           const event: PresenceChangeEvent = JSON.parse(message)
@@ -380,7 +380,7 @@ export class SessionCollaborationService implements Service {
         `SELECT user_id, joined_at, permissions, is_owner FROM ${COLLABORATORS_TABLE} WHERE session_id = $1 ORDER BY joined_at ASC`,
         [sessionId]
       )
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         user_id: row.user_id,
         joined_at: row.joined_at,
         permissions: row.permissions,

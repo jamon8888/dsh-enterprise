@@ -28,7 +28,7 @@ export class PresenceManager {
     }
     this.redis = new Redis(config.redisUrl, {
       maxRetriesPerRequest: 3,
-      retryStrategy: (times) => Math.min(times * 100, 3000),
+      retryStrategy: (times: number) => Math.min(times * 100, 3000),
       lazyConnect: true
     })
   }
@@ -215,7 +215,7 @@ export class PresenceManager {
       this.isSubscribed.set(sessionId, true)
 
       // Set up message handler
-      this.redis.on('message', (receivedChannel, message) => {
+      this.redis.on('message', (receivedChannel: string, message: string) => {
         if (receivedChannel === channel) {
           try {
             const event: PresenceChangeEvent = JSON.parse(message)
