@@ -315,10 +315,11 @@ export class SessionCollaborationService implements Service {
    */
   async hasPermission(sessionId: SessionId, userId: UserId, permission: Permission): Promise<boolean> {
     const permissions = await this.getPermissions(sessionId, userId)
+    if (permissions.length === 0) return false
     const hierarchy: Permission[] = ['read', 'write', 'admin', 'owner']
-    const userLevel = hierarchy.indexOf(permissions.find(p => hierarchy.includes(p)) || 'read')
+    const userLevel = Math.max(...permissions.map((p) => hierarchy.indexOf(p)))
     const requiredLevel = hierarchy.indexOf(permission)
-    return userLevel >= requiredLevel
+    return requiredLevel !== -1 && userLevel >= requiredLevel
   }
 
   // ===== Database operations =====
