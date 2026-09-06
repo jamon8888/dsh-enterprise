@@ -27,7 +27,7 @@ export type GuardRbacOps = {
 }
 
 export function applyGuardRbac(ctx: Context): void {
-  ctx.effect('guardRbac', (): GuardRbacOps => ({
+  (ctx.effect as any)('guardRbac', (): GuardRbacOps => ({
     modifyThresholds: (cfg: Partial<Config>, actor: GuardRole) => {
       if (!canModifyThresholds(actor)) {
         throw new GuardRbacError(
@@ -49,7 +49,7 @@ export function applyGuardRbac(ctx: Context): void {
     getActorRole: () => ((ctx as any).actor as { guardRole?: GuardRole } | undefined)?.guardRole,
   }))
 
-  (ctx.on as any)('guard/modifyThresholds', (ev: { config: Partial<Config> }, next: () => unknown) => {
+  ;(ctx.on as any)('guard/modifyThresholds', (ev: { config: Partial<Config> }, next: () => unknown) => {
     const actor = ((ctx as any).actor as { guardRole?: GuardRole } | undefined)?.guardRole
     if (!actor) throw new GuardRbacError('no guardRole on actor', 'ACTOR_MISSING')
     if (!canModifyThresholds(actor)) {
@@ -61,7 +61,7 @@ export function applyGuardRbac(ctx: Context): void {
     return next()
   })
 
-  (ctx.on as any)('guard/overrideBlock', (ev: { sessionId: string; guardId: string }, next: () => unknown) => {
+  ;(ctx.on as any)('guard/overrideBlock', (ev: { sessionId: string; guardId: string }, next: () => unknown) => {
     const actor = ((ctx as any).actor as { guardRole?: GuardRole } | undefined)?.guardRole
     if (!actor) throw new GuardRbacError('no guardRole on actor', 'ACTOR_MISSING')
     if (!canOverrideBlock(actor)) {

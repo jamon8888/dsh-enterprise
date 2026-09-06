@@ -1,6 +1,6 @@
 import { metrics } from '@opentelemetry/api'
 
-let meter = metrics.getMeter('dsh-enterprise-guards-iit')
+let meter: any = metrics.getMeter('dsh-enterprise-guards-iit')
 
 try {
   const dshOtel = await import('@deepseek-ai/dsh-enterprise-otel/meter')
