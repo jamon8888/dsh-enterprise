@@ -21,7 +21,7 @@ function mockCtx(overrides: Record<string, unknown> = {}) {
   }
 
   const handlers: Record<string, unknown> = {}
-  const ctx: Record<string, unknown> = {
+  const ctx: Record<string, any> = {
     effect: vi.fn((nameOrFn: unknown, fn?: unknown) => {
       typeof nameOrFn === 'string' ? (fn as () => unknown)() : (nameOrFn as () => unknown)()
       return () => {}

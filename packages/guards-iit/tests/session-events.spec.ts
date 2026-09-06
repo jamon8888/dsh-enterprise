@@ -104,7 +104,7 @@ describe('iit-guard.decision session events', () => {
       (c) => (c.payload as { disposition: string }).disposition === 'block',
     )
     expect(blockEvents.length).toBeGreaterThan(0)
-    const block = blockEvents[0].payload as { guardId: string; disposition: string; phi?: number; reason?: string }
+    const block = blockEvents[0]!.payload as { guardId: string; disposition: string; phi?: number; reason?: string }
     expect(block.guardId).toBe('phi-threshold')
     expect(block.disposition).toBe('block')
     expect(block.phi).toBe(0.01)
@@ -139,7 +139,7 @@ describe('iit-guard.decision session events', () => {
       (c) => (c.payload as { disposition: string }).disposition === 'warn',
     )
     expect(warnEvents.length).toBeGreaterThan(0)
-    const warn = warnEvents[0].payload as { guardId: string; disposition: string; reason?: string; ignorable?: true }
+    const warn = warnEvents[0]!.payload as { guardId: string; disposition: string; reason?: string; ignorable?: true }
     expect(warn.guardId).toBe('effect-ethos')
     expect(warn.disposition).toBe('warn')
     expect(warn.reason).toContain('effect-ethos')
@@ -231,7 +231,7 @@ describe('iit-guard.decision session events', () => {
     const ctx = { emit: (e: string, p: unknown) => { calls.push({ event: e, payload: p }) } } as any
     emitGuardDecision(ctx, 'effect-ethos', { disposition: 'warn', reason: 'norm broken', violated: ['no-homicide'] })
     expect(calls.length).toBe(1)
-    const p = calls[0].payload as { guardId: string; violated?: string[] }
+    const p = calls[0]!.payload as { guardId: string; violated?: string[] }
     expect(p.violated).toEqual(['no-homicide'])
   })
 

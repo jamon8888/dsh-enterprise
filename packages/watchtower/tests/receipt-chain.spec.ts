@@ -68,7 +68,7 @@ describe('flushSessionReceipt DB integration', () => {
   })
 
   it('in-memory fallback when no backend', async () => {
-    const noDbCtx = { get: vi.fn(() => undefined), logger: { error: vi.fn() } }
+    const noDbCtx = { get: vi.fn((_name?: string) => undefined), logger: { error: vi.fn() } }
     const backend = noDbCtx.get('postgresPersistenceBackend')
     expect(backend).toBeUndefined()
   })
