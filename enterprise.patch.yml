@@ -4,6 +4,9 @@ plugins:
   - id: guards-iit
     name: '@deepseek-ai/dsh-enterprise-guards-iit'
 
+  - id: guards-non-iit
+    name: '@deepseek-ai/dsh-enterprise-guards-non-iit'
+
   # === Observability ===
   - id: dsh-otel
     name: '@deepseek-ai/dsh-enterprise-otel'

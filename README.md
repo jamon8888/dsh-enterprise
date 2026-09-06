@@ -25,6 +25,7 @@ These are principled measures from Integrated Information Theory, applied to AI 
 | Plugin | NPM | Description |
 |--------|-----|-------------|
 | `guards-iit` | `@deepseek-ai/dsh-enterprise-guards-iit` | 11 IIT consciousness guards |
+| `guards-non-iit` | `@deepseek-ai/dsh-enterprise-guards-non-iit` | HHH constitutional + policy + rate-limit guards |
 | `dsh-otel` | `@deepseek-ai/dsh-enterprise-otel` | OpenTelemetry tracing + metrics |
 | `dsh-cost-tracker` | `@deepseek-ai/dsh-enterprise-cost-tracker` | Per-org/model token spend → PostgreSQL |
 | `dsh-sla-monitor` | `@deepseek-ai/dsh-enterprise-sla-monitor` | SLO gateway-p99 2s, guard-block-rate 1% |
