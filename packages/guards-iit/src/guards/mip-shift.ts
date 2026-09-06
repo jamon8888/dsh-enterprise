@@ -24,16 +24,19 @@ export const mipShiftGuard = {
     config: { window: number; maxShift: number; severity: 'error' | 'warn' },
     ev: { sessionId?: string; tpm?: unknown; state?: number; mip?: number },
   ): Promise<GuardResult> {
-    const iitGuards = (ctx as unknown as {
-      get: (k: string) => {
-        calculatePhi?: (tpm: unknown, state: number) => Promise<{ phi: number; mip?: number }>
-      }
-    }).get('iitGuards')
-
     let mip = ev.mip
-    if (mip === undefined && iitGuards?.calculatePhi && ev.tpm !== undefined) {
-      const res = await iitGuards.calculatePhi(ev.tpm, ev.state ?? 0)
-      mip = (res as { mip?: number }).mip
+    if (mip === undefined) {
+      const iitGuards = (
+        ctx as unknown as {
+          get?: (k: string) => {
+            calculatePhi?: (tpm: unknown, state: number) => Promise<{ phi: number; mip?: number }>
+          }
+        }
+      )?.get?.('iitGuards')
+      if (iitGuards?.calculatePhi && ev.tpm !== undefined) {
+        const res = await iitGuards.calculatePhi(ev.tpm, ev.state ?? 0)
+        mip = (res as { mip?: number }).mip
+      }
     }
     if (typeof mip !== 'number') return { disposition: 'pass' }
 
