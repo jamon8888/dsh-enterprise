@@ -3,9 +3,9 @@
  * @module @deepseek-ai/dsh-enterprise-sdk/types
  */
 
-import type { SessionId as SessionIdType } from '@deepseek-ai/dsh-session'
+import type { SessionId as SessionIdType } from '@deepseek-ai/dsh-session/types'
 // Re-export branded SessionId from dsh-session (compile-time cast, no runtime cost).
-export { SessionId } from '@deepseek-ai/dsh-session'
+export { SessionId } from '@deepseek-ai/dsh-session/types'
 type SessionId = SessionIdType
 
 /** Branded RunId — opaque cross-boundary id. */

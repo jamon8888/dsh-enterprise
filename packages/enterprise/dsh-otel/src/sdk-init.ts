@@ -4,7 +4,7 @@
  */
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { PeriodicExportingMetricReader, ConsoleMetricExporter } from '@opentelemetry/sdk-metrics'
-import type { NodeSDKOptions } from '@opentelemetry/sdk-node'
+import type { NodeSDKConfiguration as NodeSDKOptions } from '@opentelemetry/sdk-node'
 
 let sdk: NodeSDK | null = null
 let initCalled = false

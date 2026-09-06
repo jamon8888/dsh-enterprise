@@ -11,9 +11,17 @@
  * real pg/ioredis/yjs type deps in pnpm workspace).
  */
 declare module 'cordis' {
-  export type Context = any
-  export type Service = any
-  export type Plugin = any
+  export class Service {
+    constructor(...args: any[])
+    [k: string]: any
+  }
+  export class Context {
+    [k: string]: any
+  }
+  export class Plugin {
+    constructor(...args: any[])
+    [k: string]: any
+  }
   const cordis: any
   export default cordis
 }
@@ -56,10 +64,9 @@ declare module 'ioredis' {
   export default Redis
 }
 declare module 'yjs' {
-  export namespace Y {
-    class Doc {
-      [k: string]: any
-    }
+  export class Doc {
+    constructor(...args: any[])
+    [k: string]: any
   }
 }
 declare module 'y-websocket' {
