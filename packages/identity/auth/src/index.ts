@@ -20,6 +20,7 @@ import {
   type PermissionContext,
   type AuthResult,
   type LoginCredentials,
+  type Permission,
   type TokenValidationResult,
   defaultAuthConfig,
   AuthConfigSchema

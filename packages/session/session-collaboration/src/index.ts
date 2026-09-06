@@ -40,7 +40,7 @@ export function sessionCollaborationPlugin(config: SessionCollaborationConfig): 
 /**
  * Configuration schema for session collaboration
  */
-export const SessionCollaborationConfigSchema: Schema<SessionCollaborationConfig> = {
+export const SessionCollaborationConfigSchema: any = {
   type: 'object',
   properties: {
     redisUrl: { type: 'string', description: 'Redis connection URL' },

@@ -222,6 +222,7 @@ export async function runNightlyBenchmarkJob(opts: {
   if (res === undefined) return { blocked: false };
   const runId = `bench-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   const envelope: any = {
+    ...res,
     runId,
     suite: opts.suite,
     orgId: opts.orgId ?? (res as any).orgId ?? 'org-bench',
@@ -230,9 +231,6 @@ export async function runNightlyBenchmarkJob(opts: {
     phiSnapshot: { phi: (res as any).phi ?? 0, method: 'exact', cesHash: (res as any).cesHash ?? 'h' },
     ews: { variance: (res as any).variance, ac1: (res as any).ac1 },
     createdAt: new Date().toISOString(),
-    ...res,
-    runId,
-    suite: opts.suite,
   };
   // ensure required fields for test
   envelope.cost = envelope.cost ?? { usd: (res as any).costUsd ?? 0, cents: ((res as any).costUsd ?? 0) * 100 };

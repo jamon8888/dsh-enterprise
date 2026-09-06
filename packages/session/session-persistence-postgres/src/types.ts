@@ -1,5 +1,14 @@
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
 import type { Pool, PoolClient, QueryResult } from 'pg'
+
+/** Session event — local shape (dsh-session is not a linked dep of this package). */
+export type SessionEvent = {
+  time?: unknown
+  type: string
+  data?: unknown
+  surfaceOp?: unknown
+  sourceEventSeqs?: unknown
+  ignorable?: unknown
+}
 
 /** Configuration for the PostgreSQL persistence backend */
 export interface PostgresPersistenceConfig {

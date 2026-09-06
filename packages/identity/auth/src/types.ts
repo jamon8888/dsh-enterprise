@@ -111,7 +111,7 @@ export const defaultAuthConfig: AuthConfig = {
 /**
  * Schemastery schema for AuthConfig validation
  */
-export const AuthConfigSchema: Schema<AuthConfig> = {
+export const AuthConfigSchema: any = {
   type: 'object',
   properties: {
     tokenTtlMs: { type: 'number', minimum: 1, default: defaultAuthConfig.tokenTtlMs },
