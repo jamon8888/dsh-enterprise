@@ -145,6 +145,17 @@ describe('guard-runner', () => {
         calculatePhi: async () => ({ phi: 0.3 }),
       }),
     })
+    // Warmup gate needs 3 samples before wasm evaluation: seed twice, assert on third.
+    await phiTrajectoryGuard.run(
+      mockCtx({ phi_current: 0.2, phi_mean: 0.5, drift: 0.3, slope: -0.1, variance: 0.05, alert: 'critical' }) as never,
+      { window: 10, maxDrop: 0.15, maxSlope: -0.02, severity: 'error' },
+      { sessionId: 'test-session', phi: 0.2 },
+    )
+    await phiTrajectoryGuard.run(
+      mockCtx({ phi_current: 0.2, phi_mean: 0.5, drift: 0.3, slope: -0.1, variance: 0.05, alert: 'critical' }) as never,
+      { window: 10, maxDrop: 0.15, maxSlope: -0.02, severity: 'error' },
+      { sessionId: 'test-session', phi: 0.2 },
+    )
     const res = await phiTrajectoryGuard.run(
       mockCtx({ phi_current: 0.2, phi_mean: 0.5, drift: 0.3, slope: -0.1, variance: 0.05, alert: 'critical' }) as never,
       { window: 10, maxDrop: 0.15, maxSlope: -0.02, severity: 'error' },
@@ -154,6 +165,10 @@ describe('guard-runner', () => {
   })
 
   it('mipShiftGuard blocks when severity=error and deviation > maxShift', async () => {
+    // Warmup gate needs 3 samples: seed stable history, then spike.
+    const seed = { window: 10, maxShift: 1.0, severity: 'error' } as const
+    await mipShiftGuard.run({} as never, seed, { sessionId: 'test-mip', mip: 0.5 })
+    await mipShiftGuard.run({} as never, seed, { sessionId: 'test-mip', mip: 0.5 })
     const res = await mipShiftGuard.run(
       {} as never,
       { window: 10, maxShift: 1.0, severity: 'error' },
