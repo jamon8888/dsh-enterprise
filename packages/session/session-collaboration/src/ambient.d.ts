@@ -28,6 +28,7 @@ declare module 'cordis' {
 declare module 'schemastery' {
   export const z: any
   export const Schema: any
+  export type Schema<T = any> = T
   const schemastery: any
   export default schemastery
 }
@@ -71,7 +72,9 @@ declare module 'yjs' {
 }
 declare module 'y-websocket' {
   export const WebsocketProvider: any
+  export type WebsocketProvider = any
 }
 declare module '@deepseek-ai/dsh-session-persistence' {
   export const PersistenceCoordinator: any
+  export type PersistenceCoordinator = any
 }
