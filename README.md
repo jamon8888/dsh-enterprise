@@ -2,7 +2,11 @@
 
 **IIT-Inspired Enterprise Plugins for DeepSeek Harness**
 
-22 plugins for production DeepSeek agents: 11 IIT consciousness guards, observability, security, cost management, release automation, and more.
+37 packages for production DeepSeek agents: 11 IIT consciousness guards (now with
+RiskGate VI(t) viability prediction), 6 non-IIT constitutional/policy/resource
+guards, observability, security, cost management, release automation, and more.
+
+CI green: 397 tests, `tsc` 0 errors, guards-iit coverage 100% (Node 22 + 23).
 
 ## Why DSH Enterprise?
 
@@ -17,6 +21,22 @@ DSH Enterprise's differentiator is **IIT-Inspired Consciousness Guards** — 11 
 | Catastrophe Cusp Detection | Is the agent near a phase transition? |
 
 These are principled measures from Integrated Information Theory, applied to AI agent safety — not heuristics.
+
+## New in v0.1.0
+
+- **RiskGate VI(t) viability index** on `phi-trajectory`: bounded predictive
+  signal in [-1, +1] from the rolling Φ window (peak-drop + trajectory slope).
+  `VI < -0.5` warns, `VI < -0.8` blocks — failure predicted *before* it occurs,
+  unlike Φ itself which is only diagnostic. Thresholds configurable
+  (`viabilityWarn`, `viabilityBlock`); carried on `iit-guard.decision` events.
+- **guards-non-iit**: HHH constitutional judges (3-tier provider: Anthropic API
+  → shared-org → offline local-rules), OPA-style regex policy rules, per-session
+  rate-limit and budget guards. Runs before the IIT stack in the waterfall.
+- **RBAC**: Viewer/Analyst/Operator/TenantAdmin/SuperAdmin; threshold changes
+  need Operator+, block overrides need TenantAdmin+.
+- **Internals docs**: [IIT guards](docs/guards-iit-internals.md) and
+  [non-IIT guards](docs/guards-non-iit-internals.md) — catalog, evaluation
+  order, config, providers, testing gates, gotchas.
 
 ## Plugin Catalog
 
