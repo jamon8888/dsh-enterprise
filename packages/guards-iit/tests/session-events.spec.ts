@@ -1,6 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import { apply, GuardError } from '../src/guard-runner.ts'
 
+// Real WASM pkg is not built in CI/root lane (see src/__mocks__/iit-core-pkg.ts,
+// also aliased in vitest.config.ts for the mock lane). Mock it here so the
+// full-stack tests resolve identically in both lanes.
+vi.mock('@deepseek-ai/dsh-enterprise-iit-core/pkg', async () => {
+  const mock = await import('../src/__mocks__/iit-core-pkg.ts')
+  return mock
+})
+
 function mockCtx(overrides: Record<string, unknown> = {}) {
   const handlers: Record<string, unknown> = {}
   const emitCalls: { event: string; payload: unknown }[] = []
