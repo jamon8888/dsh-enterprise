@@ -32,3 +32,22 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @deepseek-ai/dsh-enterprise-guards-iit run coverage
+
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.85'
+          targets: wasm32-unknown-unknown
+      - uses: jetli/wasm-pack-action@v0.4.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: bash scripts/build-wasm.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dsh-iit-core-pkg
+          path: packages/iit-core/pkg/
+          retention-days: 14

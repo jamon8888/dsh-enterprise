@@ -3,6 +3,9 @@ target/
 *.rlib
 *.so
 
+# WASM build output (CI builds it via scripts/build-wasm.sh; never commit)
+packages/iit-core/pkg/
+
 # Node.js
 node_modules/
 .pnpm-store/

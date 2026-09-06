@@ -3,6 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "wasm-pack build --target nodejs --out-dir pkg"
-  }
+    "build": "wasm-pack build --target nodejs --out-dir pkg",
+    "test": "cargo test --locked -p dsh-enterprise-iit-core"
+  },
+  "exports": {
+    "./pkg": {
+      "types": "./pkg/dsh_enterprise_iit_core.d.ts",
+      "default": "./pkg/dsh_enterprise_iit_core.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "pkg/"
+  ]
 }
