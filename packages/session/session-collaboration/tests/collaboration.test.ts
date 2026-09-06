@@ -30,11 +30,41 @@ vi.mock('ioredis', () => {
   }
 })
 
-// Mock pg
+// Mock pg — stateful in-memory fake: the service writes then reads back
+// (join -> handoff/getCollaborators), so rows: [] always breaks ownership,
+// permissions, and header tests. Dispatch on the 4 query shapes in service.ts.
+const pgStore = vi.hoisted(() => ({ rows: new Map<string, any>() }) )
 vi.mock('pg', () => ({
   Pool: vi.fn(() => ({
     connect: vi.fn().mockResolvedValue({
-      query: vi.fn().mockResolvedValue({ rows: [] }),
+      query: vi.fn(async (sql: string, params: any[] = []) => {
+        const store = pgStore.rows
+        if (/INSERT INTO session_collaborators/.test(sql)) {
+          const [session_id, user_id, permissions, is_owner] = params
+          store.set(`${session_id}:${user_id}`, {
+            session_id, user_id, permissions, is_owner, joined_at: new Date(),
+          })
+          return { rows: [] }
+        }
+        if (/SELECT .* FROM session_collaborators/.test(sql)) {
+          if (params.length === 2) {
+            const row = store.get(`${params[0]}:${params[1]}`)
+            return { rows: row ? [row] : [] }
+          }
+          return { rows: [...store.values()].filter((r) => r.session_id === params[0]) }
+        }
+        if (/UPDATE session_collaborators/.test(sql)) {
+          const [permissions, is_owner, session_id, user_id] = params
+          const row = store.get(`${session_id}:${user_id}`)
+          if (row) Object.assign(row, { permissions, is_owner })
+          return { rows: [] }
+        }
+        if (/DELETE FROM session_collaborators/.test(sql)) {
+          store.delete(`${params[0]}:${params[1]}`)
+          return { rows: [] }
+        }
+        return { rows: [] }
+      }),
       release: vi.fn()
     }),
     end: vi.fn().mockResolvedValue(undefined)
@@ -79,6 +109,7 @@ describe('SessionCollaborationService', () => {
   const userId2: UserId = 'user-2'
 
   beforeEach(async () => {
+    pgStore.rows.clear()
     mockCtx = {
       provide: vi.fn(),
       on: vi.fn(),
