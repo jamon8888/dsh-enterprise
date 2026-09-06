@@ -195,7 +195,7 @@ export async function emitBenchmarkEnvelope(envelope: any, pg?: { insertRunEvent
   benchmarkRunEvents.set(id, envelope);
   if (pg?.insertRunEvent) await pg.insertRunEvent(envelope);
 }
-type BenchmarkSuite = string;
+export type BenchmarkSuite = string;
 export async function runNightlyBenchmarkJob(opts: {
   suite: BenchmarkSuite;
   runner: (suite: BenchmarkSuite) => Promise<Record<string, unknown>>;

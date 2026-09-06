@@ -163,7 +163,7 @@ describe('needs-human GitHub check run', () => {
       receipt,
       {
         postCheckRun: async () => ({ id: 1, url: 'https://github.com/run/1' }),
-      },
+      } as unknown as GithubClient,
       { guardRole: 'tenantadmin' },
     )
     expect(approvedReceipt.outcome).toBe('accepted')
@@ -178,7 +178,7 @@ describe('needs-human GitHub check run', () => {
     await expect(
       approveNeedsHuman(
         receipt,
-        { postCheckRun: async () => ({ id: 1, url: '' }) },
+        { postCheckRun: async () => ({ id: 1, url: '' }) } as unknown as GithubClient,
         { guardRole: 'tenantadmin' },
       ),
     ).rejects.toThrow('not needs-human')

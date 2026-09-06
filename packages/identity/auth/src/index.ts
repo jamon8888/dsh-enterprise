@@ -5,7 +5,8 @@
  * Implementations include OAuth providers, API keys, session tokens, and RBAC.
  */
 
-import type { Context, Service, Plugin } from 'cordis'
+import type { Context, Plugin } from 'cordis'
+import { Service } from 'cordis'
 import type { Schema } from 'schemastery'
 
 import {
@@ -103,7 +104,7 @@ declare module 'cordis' {
  */
 export function defaultPermissionResolver(ctx: PermissionContext): boolean {
   const { principal, resource, action } = ctx
-  const requiredPermission = `${resource}:${action}` as const
+  const requiredPermission = `${resource}:${action}` as Permission
   
   // Check direct permissions
   if (principal.permissions.includes(requiredPermission)) {
@@ -111,7 +112,7 @@ export function defaultPermissionResolver(ctx: PermissionContext): boolean {
   }
 
   // Check wildcard permissions
-  const resourceWildcard = `${resource}:*` as const
+  const resourceWildcard = `${resource}:*` as Permission
   if (principal.permissions.includes(resourceWildcard)) {
     return true
   }

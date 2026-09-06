@@ -1,4 +1,5 @@
-import { Context, Service } from 'cordis'
+import type { Context } from 'cordis'
+import { Service } from 'cordis'
 import { z } from 'schemastery'
 import { PostgresPersistenceBackend } from './backend.js'
 import { PostgresPersistenceCoordinator } from './coordinator.js'

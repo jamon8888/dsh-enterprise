@@ -1,6 +1,8 @@
-import { Context, Service } from 'cordis'
+import type { Context } from 'cordis'
+import { Service } from 'cordis'
 import { z } from 'schemastery'
-import pg, { Pool, PoolClient, QueryResult } from 'pg'
+import pg from 'pg'
+import type { PoolClient, QueryResult } from 'pg'
 import { copyFrom } from 'pg-copy-streams'
 import type { SessionEvent } from '@deepseek-ai/dsh-session'
 import type {
