@@ -6,7 +6,7 @@ try {
   const dshOtel = await import('@deepseek-ai/dsh-enterprise-otel/meter')
   meter = (dshOtel as { meter: { createHistogram: (name: string, opts?: Record<string, unknown>) => { record: (value: number, attributes?: Record<string, string>) => void } } }).meter
 } catch {
-  meter = metrics.getMeter('dsh-enterprise-guards-iit-noop', { version: '0.0.0' })
+  meter = metrics.getMeter('dsh-enterprise-guards-iit-noop', '0.0.0')
 }
 
 export const iitPhiHistogram = meter.createHistogram('iit.phi', {

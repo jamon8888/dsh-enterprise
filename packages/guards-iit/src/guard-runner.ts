@@ -121,7 +121,7 @@ export function apply(ctx: Context, cfg: Config): void {
     },
   }))
 
-  const tools: Record<string, unknown> = ctx.tools as unknown as Record<string, unknown>
+  const tools: Record<string, unknown> = (ctx as any).tools as unknown as Record<string, unknown>
   const orig = typeof tools.guard === 'function'
     ? (tools.guard as (ev: unknown, next: (ev: unknown) => Promise<unknown>) => Promise<unknown>).bind(tools)
     : undefined
@@ -153,14 +153,14 @@ export function apply(ctx: Context, cfg: Config): void {
       if (!hasTpm && TPM_DEPENDENT.has(guard.id)) continue
       const t0 = performance.now()
       const guardCfg = getGuardConfig(guard.id, cfg)
-      const result = (await guard.run(ctx, guardCfg, e as any)) as import('./types.js').GuardResult
+      const result = (await guard.run(ctx, guardCfg as any, e as any)) as import('./types.js').GuardResult
       const ms = performance.now() - t0
       recordLatency(ms, guard.id)
       guardDecisions.push({ guardId: guard.id, disposition: result.disposition, phi: result.phi, reason: result.reason })
       if (result.disposition === 'block') {
         emitGuardDecision(ctx, guard.id, result)
         try {
-          ;(ctx.emit as (event: string, payload: unknown) => void)('policy/evaluate', {
+          ;((ctx as any).emit as (event: string, payload: unknown) => void)('policy/evaluate', {
             turn: (ev as { turn?: number }).turn ?? 0,
             step: (ev as { step?: number }).step ?? 0,
             callId: (ev as { callId?: string }).callId ?? '',
@@ -184,7 +184,7 @@ export function apply(ctx: Context, cfg: Config): void {
       }
     }
     try {
-      ;(ctx.emit as (event: string, payload: unknown) => void)('policy/evaluate', {
+      ;((ctx as any).emit as (event: string, payload: unknown) => void)('policy/evaluate', {
         turn: (ev as { turn?: number }).turn ?? 0,
         step: (ev as { step?: number }).step ?? 0,
         callId: (ev as { callId?: string }).callId ?? '',
@@ -217,7 +217,7 @@ export function apply(ctx: Context, cfg: Config): void {
       return next(ev)
     }
   } else {
-    ctx.on('tools/guard', async (ev: unknown, next: (ev: unknown) => Promise<unknown>) => {
+    (ctx.on as any)('tools/guard', async (ev: unknown, next: (ev: unknown) => Promise<unknown>) => {
       await runGuards(ev)
       return next(ev as never)
     })
