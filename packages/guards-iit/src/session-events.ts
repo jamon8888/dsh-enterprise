@@ -49,6 +49,7 @@ export function emitGuardDecision(
     ...(result.phi !== undefined ? { phi: result.phi } : {}),
     ...(result.cesHash !== undefined ? { cesHash: result.cesHash } : {}),
     ...(result.reason !== undefined ? { reason: result.reason } : {}),
+    ...(result.viabilityIndex !== undefined ? { viabilityIndex: result.viabilityIndex } : {}),
     ...(result.violated !== undefined ? { violated: result.violated } : {}),
     ...(ignorable !== undefined ? { ignorable } : {}),
   }

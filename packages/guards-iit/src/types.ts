@@ -20,6 +20,10 @@ export interface GuardResult {
   cesHash?: string
   /** Human-readable block/warn reason. */
   reason?: string
+  /** RiskGate viability index [-1, +1] (phi-trajectory): +1 healthy, -1 failure imminent. */
+  viabilityIndex?: number
+  /** Derived from viabilityIndex (> -0.5): false = early warning zone. */
+  trajectoryStable?: boolean
   /** Violated teloid IDs (effect-ethos). */
   violated?: string[]
 }

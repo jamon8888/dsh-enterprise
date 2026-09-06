@@ -19,7 +19,9 @@ export const Config = z.object({
     window: z.number().default(10),
     maxDrop: z.number().default(0.15),
     maxSlope: z.number().default(-0.02),
-  }).default({ window: 10, maxDrop: 0.15, maxSlope: -0.02 }),
+    viabilityWarn: z.number().default(-0.5),
+    viabilityBlock: z.number().default(-0.8),
+  }).default({ window: 10, maxDrop: 0.15, maxSlope: -0.02, viabilityWarn: -0.5, viabilityBlock: -0.8 }),
   mipShift: z.object({
     window: z.number().default(10),
     maxShift: z.number().default(2.0),
