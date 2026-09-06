@@ -70,4 +70,4 @@ export type {
   PresenceChangeEvent,
   CursorUpdateEvent,
   SessionCollaborationHeader
-} from './types.js
+} from './types.js';
