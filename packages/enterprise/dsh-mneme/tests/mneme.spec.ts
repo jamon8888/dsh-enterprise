@@ -84,7 +84,8 @@ describe('dsh-mneme', () => {
   })
 
   // Test 7: recent() — returns last n entries by ts desc
-  // Note: better-sqlite3 native addon may not load (Alpine/musl, Windows); returns [] when unavailable
+  // better-sqlite3 builds in CI (returns rows) but not locally
+  // (build scripts ignored → db null → []). Assert both branches.
   it('recent() — returns last n entries by ts desc', async () => {
     const s = new MnemeStore()
     s.clear()
@@ -94,7 +95,11 @@ describe('dsh-mneme', () => {
     await new Promise((r) => setTimeout(r, 10))
     await s.store('third', 'c')
     const recent2 = await s.recent(2)
-    expect(recent2).toEqual([])
+    if (recent2.length > 0) {
+      expect(recent2.map((e) => e.k)).toEqual(['third', 'second'])
+    } else {
+      expect(recent2).toEqual([])
+    }
   })
 
   // Test 8: recent() — returns [] when SQLite unavailable
